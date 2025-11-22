@@ -11,6 +11,26 @@ import java.awt.*;
 
 public class SimpleBoard implements Board {
 
+    // Movement offsets for brick translation
+    /** Horizontal offset for moving brick left (negative direction) */
+    private static final int MOVE_LEFT_OFFSET = -1;
+    
+    /** Horizontal offset for moving brick right (positive direction) */
+    private static final int MOVE_RIGHT_OFFSET = 1;
+    
+    /** Vertical offset for moving brick down */
+    private static final int MOVE_DOWN_OFFSET = 1;
+    
+    /** No movement offset (used when only one axis changes) */
+    private static final int NO_MOVEMENT = 0;
+
+    // Brick spawn position
+    /** X coordinate (column) where new bricks spawn */
+    private static final int BRICK_SPAWN_X = 4;
+    
+    /** Y coordinate (row) where new bricks spawn */
+    private static final int BRICK_SPAWN_Y = 1;
+
     private final int width;
     private final int height;
     private final BrickGenerator brickGenerator;
@@ -32,7 +52,7 @@ public class SimpleBoard implements Board {
     public boolean moveBrickDown() {
         int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
         Point p = new Point(currentOffset);
-        p.translate(0, 1);
+        p.translate(NO_MOVEMENT, MOVE_DOWN_OFFSET);
         boolean conflict = MatrixOperations.intersect(currentMatrix, brickRotator.getCurrentShape(), (int) p.getX(), (int) p.getY());
         if (conflict) {
             return false;
@@ -47,7 +67,7 @@ public class SimpleBoard implements Board {
     public boolean moveBrickLeft() {
         int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
         Point p = new Point(currentOffset);
-        p.translate(-1, 0);
+        p.translate(MOVE_LEFT_OFFSET, NO_MOVEMENT);
         boolean conflict = MatrixOperations.intersect(currentMatrix, brickRotator.getCurrentShape(), (int) p.getX(), (int) p.getY());
         if (conflict) {
             return false;
@@ -61,7 +81,7 @@ public class SimpleBoard implements Board {
     public boolean moveBrickRight() {
         int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
         Point p = new Point(currentOffset);
-        p.translate(1, 0);
+        p.translate(MOVE_RIGHT_OFFSET, NO_MOVEMENT);
         boolean conflict = MatrixOperations.intersect(currentMatrix, brickRotator.getCurrentShape(), (int) p.getX(), (int) p.getY());
         if (conflict) {
             return false;
@@ -88,7 +108,7 @@ public class SimpleBoard implements Board {
     public boolean createNewBrick() {
         Brick currentBrick = brickGenerator.getBrick();
         brickRotator.setBrick(currentBrick);
-        currentOffset = new Point(4, 1);
+        currentOffset = new Point(BRICK_SPAWN_X, BRICK_SPAWN_Y);
         return MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
     }
 
