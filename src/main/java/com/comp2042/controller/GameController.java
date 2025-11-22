@@ -12,7 +12,18 @@ import com.comp2042.view.GuiController;
 
 public class GameController implements InputEventListener {
 
-    private Board board = new SimpleBoard(25, 10);
+    // Board dimensions
+    /** Number of rows (height) in the game board */
+    private static final int BOARD_HEIGHT = 25;
+    
+    /** Number of columns (width) in the game board */
+    private static final int BOARD_WIDTH = 10;
+
+    // Scoring rules
+    /** Points awarded for manually moving a brick down */
+    private static final int MANUAL_MOVE_SCORE = 1;
+
+    private Board board = new SimpleBoard(BOARD_HEIGHT, BOARD_WIDTH);
 
     private final GuiController viewGuiController;
 
@@ -42,7 +53,7 @@ public class GameController implements InputEventListener {
 
         } else {
             if (event.getEventSource() == EventSource.USER) {
-                board.getScore().add(1);
+                board.getScore().add(MANUAL_MOVE_SCORE);
             }
         }
         return new DownData(clearRow, board.getViewData());
