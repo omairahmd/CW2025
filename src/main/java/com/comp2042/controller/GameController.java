@@ -40,23 +40,65 @@ public class GameController implements InputEventListener {
         boolean canMove = board.moveBrickDown();
         ClearRow clearRow = null;
         if (!canMove) {
-            board.mergeBrickToBackground();
-            clearRow = board.clearRows();
-            if (clearRow.getLinesRemoved() > 0) {
-                board.getScore().add(clearRow.getScoreBonus());
-            }
-            if (board.createNewBrick()) {
-                viewGuiController.gameOver();
-            }
-
-            viewGuiController.refreshGameBackground(board.getBoardMatrix());
-
+            clearRow = handleBrickLocked();
         } else {
-            if (event.getEventSource() == EventSource.USER) {
-                board.getScore().add(MANUAL_MOVE_SCORE);
-            }
+            awardManualMoveScore(event);
         }
         return new DownData(clearRow, board.getViewData());
+    }
+
+    /**
+     * Handles the logic when a brick can no longer move down (is locked).
+     * Merges the brick to the background, clears completed rows, updates score,
+     * checks for game over, and refreshes the view.
+     *
+     * @return ClearRow information about cleared rows, or null if no rows were cleared
+     */
+    private ClearRow handleBrickLocked() {
+        board.mergeBrickToBackground();
+        ClearRow clearRow = board.clearRows();
+        updateScoreForClearedRows(clearRow);
+        checkAndHandleGameOver();
+        refreshGameView();
+        return clearRow;
+    }
+
+    /**
+     * Updates the score if any rows were cleared.
+     *
+     * @param clearRow the result of row clearing operation
+     */
+    private void updateScoreForClearedRows(ClearRow clearRow) {
+        if (clearRow.getLinesRemoved() > 0) {
+            board.getScore().add(clearRow.getScoreBonus());
+        }
+    }
+
+    /**
+     * Checks if the game is over (new brick cannot be created) and triggers game over if needed.
+     */
+    private void checkAndHandleGameOver() {
+        if (board.createNewBrick()) {
+            viewGuiController.gameOver();
+        }
+    }
+
+    /**
+     * Refreshes the game view to display the current board state.
+     */
+    private void refreshGameView() {
+        viewGuiController.refreshGameBackground(board.getBoardMatrix());
+    }
+
+    /**
+     * Awards score points for manually moving a brick down (user input).
+     *
+     * @param event the move event that triggered this action
+     */
+    private void awardManualMoveScore(MoveEvent event) {
+        if (event.getEventSource() == EventSource.USER) {
+            board.getScore().add(MANUAL_MOVE_SCORE);
+        }
     }
 
     @Override
@@ -81,7 +123,7 @@ public class GameController implements InputEventListener {
     @Override
     public void createNewGame() {
         board.newGame();
-        viewGuiController.refreshGameBackground(board.getBoardMatrix());
+        refreshGameView();
     }
 }
 
