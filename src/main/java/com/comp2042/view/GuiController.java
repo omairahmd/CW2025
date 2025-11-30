@@ -92,6 +92,20 @@ public class GuiController implements Initializable {
         Font.loadFont(getClass().getClassLoader().getResource("digital.ttf").toExternalForm(), DIGITAL_FONT_SIZE);
         gamePanel.setFocusTraversable(true);
         gamePanel.requestFocus();
+        initInputHandlers();
+        gameOverPanel.setVisible(false);
+
+        final Reflection reflection = new Reflection();
+        reflection.setFraction(REFLECTION_FRACTION);
+        reflection.setTopOpacity(REFLECTION_TOP_OPACITY);
+        reflection.setTopOffset(REFLECTION_TOP_OFFSET);
+    }
+
+    /**
+     * Initializes keyboard input handlers for game controls.
+     * Sets up event handlers for arrow keys, WASD keys, and the new game key (N).
+     */
+    private void initInputHandlers() {
         gamePanel.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
@@ -118,12 +132,6 @@ public class GuiController implements Initializable {
                 }
             }
         });
-        gameOverPanel.setVisible(false);
-
-        final Reflection reflection = new Reflection();
-        reflection.setFraction(REFLECTION_FRACTION);
-        reflection.setTopOpacity(REFLECTION_TOP_OPACITY);
-        reflection.setTopOffset(REFLECTION_TOP_OFFSET);
     }
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
