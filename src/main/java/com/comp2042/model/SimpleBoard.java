@@ -46,44 +46,39 @@ public class SimpleBoard implements Board {
         score = new Score();
     }
 
-    @Override
-    public boolean moveBrickDown() {
+    /**
+     * Attempts to move the current brick by the specified offsets.
+     * Checks for conflicts and updates the current offset only if the move is valid.
+     *
+     * @param deltaX the horizontal offset (positive = right, negative = left)
+     * @param deltaY the vertical offset (positive = down, negative = up)
+     * @return true if the move was successful (no conflict), false otherwise
+     */
+    private boolean tryMove(int deltaX, int deltaY) {
         int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
-        GamePoint p = currentOffset.translate(NO_MOVEMENT, MOVE_DOWN_OFFSET);
-        boolean conflict = MatrixOperations.intersect(currentMatrix, brickRotator.getCurrentShape(), p.getX(), p.getY());
+        GamePoint newPosition = currentOffset.translate(deltaX, deltaY);
+        boolean conflict = MatrixOperations.intersect(currentMatrix, brickRotator.getCurrentShape(), newPosition.getX(), newPosition.getY());
         if (conflict) {
             return false;
         } else {
-            currentOffset = p;
+            currentOffset = newPosition;
             return true;
         }
     }
 
+    @Override
+    public boolean moveBrickDown() {
+        return tryMove(NO_MOVEMENT, MOVE_DOWN_OFFSET);
+    }
 
     @Override
     public boolean moveBrickLeft() {
-        int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
-        GamePoint p = currentOffset.translate(MOVE_LEFT_OFFSET, NO_MOVEMENT);
-        boolean conflict = MatrixOperations.intersect(currentMatrix, brickRotator.getCurrentShape(), p.getX(), p.getY());
-        if (conflict) {
-            return false;
-        } else {
-            currentOffset = p;
-            return true;
-        }
+        return tryMove(MOVE_LEFT_OFFSET, NO_MOVEMENT);
     }
 
     @Override
     public boolean moveBrickRight() {
-        int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
-        GamePoint p = currentOffset.translate(MOVE_RIGHT_OFFSET, NO_MOVEMENT);
-        boolean conflict = MatrixOperations.intersect(currentMatrix, brickRotator.getCurrentShape(), p.getX(), p.getY());
-        if (conflict) {
-            return false;
-        } else {
-            currentOffset = p;
-            return true;
-        }
+        return tryMove(MOVE_RIGHT_OFFSET, NO_MOVEMENT);
     }
 
     @Override
