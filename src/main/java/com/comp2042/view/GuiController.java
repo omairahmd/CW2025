@@ -62,6 +62,22 @@ public class GuiController implements Initializable {
     
     /** Top offset of reflection effect in pixels */
     private static final double REFLECTION_TOP_OFFSET = -12.0;
+    
+    // Color mapping for brick types
+    /** Array mapping color index to Paint color. Index 0 is TRANSPARENT, indices 1-7 are brick colors. */
+    private static final Paint[] COLOR_MAP = {
+            Color.TRANSPARENT,  // 0
+            Color.AQUA,          // 1
+            Color.BLUEVIOLET,    // 2
+            Color.DARKGREEN,     // 3
+            Color.YELLOW,        // 4
+            Color.RED,           // 5
+            Color.BEIGE,         // 6
+            Color.BURLYWOOD      // 7
+    };
+    
+    /** Default color used when color index is out of bounds */
+    private static final Paint DEFAULT_COLOR = Color.WHITE;
 
     @FXML
     private GridPane gamePanel;
@@ -166,38 +182,17 @@ public class GuiController implements Initializable {
         timeLine.play();
     }
 
-    private Paint getFillColor(int i) {
-        Paint returnPaint;
-        switch (i) {
-            case 0:
-                returnPaint = Color.TRANSPARENT;
-                break;
-            case 1:
-                returnPaint = Color.AQUA;
-                break;
-            case 2:
-                returnPaint = Color.BLUEVIOLET;
-                break;
-            case 3:
-                returnPaint = Color.DARKGREEN;
-                break;
-            case 4:
-                returnPaint = Color.YELLOW;
-                break;
-            case 5:
-                returnPaint = Color.RED;
-                break;
-            case 6:
-                returnPaint = Color.BEIGE;
-                break;
-            case 7:
-                returnPaint = Color.BURLYWOOD;
-                break;
-            default:
-                returnPaint = Color.WHITE;
-                break;
+    /**
+     * Returns the Paint color corresponding to the given color index.
+     * 
+     * @param colorIndex the color index (0 = TRANSPARENT, 1-7 = brick colors)
+     * @return the Paint color for the given index, or DEFAULT_COLOR if index is out of bounds
+     */
+    private Paint getFillColor(int colorIndex) {
+        if (colorIndex >= 0 && colorIndex < COLOR_MAP.length) {
+            return COLOR_MAP[colorIndex];
         }
-        return returnPaint;
+        return DEFAULT_COLOR;
     }
 
 
