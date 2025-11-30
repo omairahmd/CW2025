@@ -134,7 +134,25 @@ public class GuiController implements Initializable {
         inputHandler.initialize();
     }
 
+    /**
+     * Initializes the game view by setting up the background grid, falling brick, and game loop.
+     *
+     * @param boardMatrix the game board matrix
+     * @param brick the initial brick data
+     */
     public void initGameView(int[][] boardMatrix, ViewData brick) {
+        initializeBackgroundGrid(boardMatrix);
+        initializeFallingBrick(brick);
+        setupGameLoop();
+    }
+
+    /**
+     * Initializes the background grid (displayMatrix) that represents the game board.
+     * Creates transparent rectangles for each cell in the visible portion of the board.
+     *
+     * @param boardMatrix the game board matrix
+     */
+    private void initializeBackgroundGrid(int[][] boardMatrix) {
         displayMatrix = new Rectangle[boardMatrix.length][boardMatrix[0].length];
         for (int i = BOARD_VISIBLE_START_ROW; i < boardMatrix.length; i++) {
             for (int j = 0; j < boardMatrix[i].length; j++) {
@@ -144,7 +162,15 @@ public class GuiController implements Initializable {
                 gamePanel.add(rectangle, j, i - BOARD_VISIBLE_START_ROW);
             }
         }
+    }
 
+    /**
+     * Initializes the falling brick by creating rectangles for the brick shape
+     * and positioning the brick panel at the initial spawn location.
+     *
+     * @param brick the ViewData containing brick shape and position information
+     */
+    private void initializeFallingBrick(ViewData brick) {
         rectangles = new Rectangle[brick.getBrickData().length][brick.getBrickData()[0].length];
         for (int i = 0; i < brick.getBrickData().length; i++) {
             for (int j = 0; j < brick.getBrickData()[i].length; j++) {
@@ -156,8 +182,13 @@ public class GuiController implements Initializable {
         }
         brickPanel.setLayoutX(gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
         brickPanel.setLayoutY(BRICK_PANEL_Y_OFFSET + gamePanel.getLayoutY() + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
+    }
 
-
+    /**
+     * Sets up the automatic game loop that moves bricks down at regular intervals.
+     * Creates and starts a Timeline that triggers down movement events.
+     */
+    private void setupGameLoop() {
         timeLine = new Timeline(new KeyFrame(
                 Duration.millis(AUTO_DROP_INTERVAL_MS),
                 ae -> moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
