@@ -1,5 +1,6 @@
 package com.comp2042.view;
 
+import com.comp2042.controller.GameInputHandler;
 import com.comp2042.events.InputEventListener;
 import com.comp2042.events.MoveEvent;
 import com.comp2042.events.EventSource;
@@ -12,13 +13,10 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
 import javafx.scene.effect.Reflection;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -103,12 +101,14 @@ public class GuiController implements Initializable {
 
     private final BooleanProperty isGameOver = new SimpleBooleanProperty();
 
+    private GameInputHandler inputHandler;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Font.loadFont(getClass().getClassLoader().getResource("digital.ttf").toExternalForm(), DIGITAL_FONT_SIZE);
         gamePanel.setFocusTraversable(true);
         gamePanel.requestFocus();
-        initInputHandlers();
+        initializeInputHandlers();
         gameOverPanel.setVisible(false);
 
         final Reflection reflection = new Reflection();
@@ -119,35 +119,19 @@ public class GuiController implements Initializable {
 
     /**
      * Initializes keyboard input handlers for game controls.
-     * Sets up event handlers for arrow keys, WASD keys, and the new game key (N).
+     * Creates and configures a GameInputHandler to manage all keyboard input.
      */
-    private void initInputHandlers() {
-        gamePanel.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent keyEvent) {
-                if (isPause.getValue() == Boolean.FALSE && isGameOver.getValue() == Boolean.FALSE) {
-                    if (keyEvent.getCode() == KeyCode.LEFT || keyEvent.getCode() == KeyCode.A) {
-                        refreshBrick(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
-                        keyEvent.consume();
-                    }
-                    if (keyEvent.getCode() == KeyCode.RIGHT || keyEvent.getCode() == KeyCode.D) {
-                        refreshBrick(eventListener.onRightEvent(new MoveEvent(EventType.RIGHT, EventSource.USER)));
-                        keyEvent.consume();
-                    }
-                    if (keyEvent.getCode() == KeyCode.UP || keyEvent.getCode() == KeyCode.W) {
-                        refreshBrick(eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER)));
-                        keyEvent.consume();
-                    }
-                    if (keyEvent.getCode() == KeyCode.DOWN || keyEvent.getCode() == KeyCode.S) {
-                        moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
-                        keyEvent.consume();
-                    }
-                }
-                if (keyEvent.getCode() == KeyCode.N) {
-                    newGame(null);
-                }
-            }
-        });
+    private void initializeInputHandlers() {
+        inputHandler = new GameInputHandler(
+                gamePanel,
+                eventListener,
+                isPause,
+                isGameOver,
+                this::refreshBrick,
+                this::moveDown,
+                () -> newGame(null)
+        );
+        inputHandler.initialize();
     }
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
@@ -196,7 +180,13 @@ public class GuiController implements Initializable {
     }
 
 
-    private void refreshBrick(ViewData brick) {
+    /**
+     * Refreshes the brick display based on the provided ViewData.
+     * This method is called by GameInputHandler and must be accessible.
+     *
+     * @param brick the ViewData containing brick position and shape information
+     */
+    public void refreshBrick(ViewData brick) {
         if (isPause.getValue() == Boolean.FALSE) {
             brickPanel.setLayoutX(gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
             brickPanel.setLayoutY(BRICK_PANEL_Y_OFFSET + gamePanel.getLayoutY() + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
@@ -222,7 +212,13 @@ public class GuiController implements Initializable {
         rectangle.setArcWidth(RECTANGLE_ARC_RADIUS);
     }
 
-    private void moveDown(MoveEvent event) {
+    /**
+     * Handles the down movement event.
+     * This method is called by GameInputHandler and must be accessible.
+     *
+     * @param event the MoveEvent representing the down movement
+     */
+    public void moveDown(MoveEvent event) {
         if (isPause.getValue() == Boolean.FALSE) {
             DownData downData = eventListener.onDownEvent(event);
             if (downData.getClearRow() != null && downData.getClearRow().getLinesRemoved() > 0) {
