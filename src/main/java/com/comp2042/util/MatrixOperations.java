@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 
 public class MatrixOperations {
 
+    // Scoring constants
+    /** Base score points awarded per cleared line (used in score calculation) */
+    private static final int BASE_SCORE_PER_LINE = 50;
 
     //We don't want to instantiate this utility class
     private MatrixOperations(){
@@ -21,7 +24,7 @@ public class MatrixOperations {
             for (int j = 0; j < brick[i].length; j++) {
                 int targetX = x + i;
                 int targetY = y + j;
-                if (brick[j][i] != 0 && (checkOutOfBound(matrix, targetX, targetY) || matrix[targetY][targetX] != 0)) {
+                if (brick[j][i] != 0 && (isOutOfBounds(matrix, targetX, targetY) || matrix[targetY][targetX] != 0)) {
                     return true;
                 }
             }
@@ -29,7 +32,15 @@ public class MatrixOperations {
         return false;
     }
 
-    private static boolean checkOutOfBound(int[][] matrix, int targetX, int targetY) {
+    /**
+     * Checks if the given coordinates are out of bounds for the matrix.
+     *
+     * @param matrix the matrix to check bounds against
+     * @param targetX the x coordinate to check
+     * @param targetY the y coordinate to check
+     * @return true if the coordinates are out of bounds, false otherwise
+     */
+    private static boolean isOutOfBounds(int[][] matrix, int targetX, int targetY) {
         boolean returnValue = true;
         if (targetX >= 0 && targetY < matrix.length && targetX < matrix[targetY].length) {
             returnValue = false;
@@ -90,7 +101,7 @@ public class MatrixOperations {
                 break;
             }
         }
-        int scoreBonus = 50 * clearedRows.size() * clearedRows.size();
+        int scoreBonus = BASE_SCORE_PER_LINE * clearedRows.size() * clearedRows.size();
         return new ClearRow(clearedRows.size(), tmp, scoreBonus);
     }
 
