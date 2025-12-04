@@ -24,7 +24,7 @@ public class MatrixOperations {
             for (int j = 0; j < brick[i].length; j++) {
                 int targetX = x + i;
                 int targetY = y + j;
-                if (brick[j][i] != 0 && (isOutOfBounds(matrix, targetX, targetY) || matrix[targetY][targetX] != 0)) {
+                if (brick[i][j] != 0 && (isOutOfBounds(matrix, targetX, targetY) || matrix[targetY][targetX] != 0)) {
                     return true;
                 }
             }
@@ -42,7 +42,7 @@ public class MatrixOperations {
      */
     private static boolean isOutOfBounds(int[][] matrix, int targetX, int targetY) {
         boolean returnValue = true;
-        if (targetX >= 0 && targetY < matrix.length && targetX < matrix[targetY].length) {
+        if (targetX >= 0 && targetY >= 0 && targetY < matrix.length && targetX < matrix[targetY].length) {
             returnValue = false;
         }
         return returnValue;
@@ -65,8 +65,8 @@ public class MatrixOperations {
             for (int j = 0; j < brick[i].length; j++) {
                 int targetX = x + i;
                 int targetY = y + j;
-                if (brick[j][i] != 0) {
-                    copy[targetY][targetX] = brick[j][i];
+                if (brick[i][j] != 0) {
+                    copy[targetY][targetX] = brick[i][j];
                 }
             }
         }
