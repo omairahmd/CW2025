@@ -23,7 +23,7 @@ public class GameController implements InputEventListener {
     /** Points awarded for manually moving a brick down */
     private static final int MANUAL_MOVE_SCORE = 1;
 
-    private Board board = new SimpleBoard(BOARD_HEIGHT, BOARD_WIDTH);
+    private Board board = new SimpleBoard(BOARD_WIDTH, BOARD_HEIGHT);
 
     private final GuiController viewGuiController;
 

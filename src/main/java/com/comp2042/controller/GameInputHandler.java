@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 public class GameInputHandler {
 
     private final GridPane gamePanel;
-    private final InputEventListener eventListener;
+    private InputEventListener eventListener;
     private final BooleanProperty isPause;
     private final BooleanProperty isGameOver;
     private final Consumer<ViewData> refreshBrickCallback;
@@ -56,6 +56,16 @@ public class GameInputHandler {
     }
 
     /**
+     * Updates the event listener reference.
+     * This is called after the event listener is set in GuiController.
+     *
+     * @param eventListener the new event listener to use
+     */
+    public void setEventListener(InputEventListener eventListener) {
+        this.eventListener = eventListener;
+    }
+
+    /**
      * Initializes keyboard input handlers for game controls.
      * Sets up event handlers for arrow keys, WASD keys, and the new game key (N).
      */
@@ -65,15 +75,21 @@ public class GameInputHandler {
             public void handle(KeyEvent keyEvent) {
                 if (isPause.getValue() == Boolean.FALSE && isGameOver.getValue() == Boolean.FALSE) {
                     if (keyEvent.getCode() == KeyCode.LEFT || keyEvent.getCode() == KeyCode.A) {
-                        refreshBrickCallback.accept(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
+                        if (eventListener != null) {
+                            refreshBrickCallback.accept(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
+                        }
                         keyEvent.consume();
                     }
                     if (keyEvent.getCode() == KeyCode.RIGHT || keyEvent.getCode() == KeyCode.D) {
-                        refreshBrickCallback.accept(eventListener.onRightEvent(new MoveEvent(EventType.RIGHT, EventSource.USER)));
+                        if (eventListener != null) {
+                            refreshBrickCallback.accept(eventListener.onRightEvent(new MoveEvent(EventType.RIGHT, EventSource.USER)));
+                        }
                         keyEvent.consume();
                     }
                     if (keyEvent.getCode() == KeyCode.UP || keyEvent.getCode() == KeyCode.W) {
-                        refreshBrickCallback.accept(eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER)));
+                        if (eventListener != null) {
+                            refreshBrickCallback.accept(eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER)));
+                        }
                         keyEvent.consume();
                     }
                     if (keyEvent.getCode() == KeyCode.DOWN || keyEvent.getCode() == KeyCode.S) {

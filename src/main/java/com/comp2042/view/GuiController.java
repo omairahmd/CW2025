@@ -264,6 +264,10 @@ public class GuiController implements Initializable {
 
     public void setEventListener(InputEventListener eventListener) {
         this.eventListener = eventListener;
+        // Update the event listener in the input handler if it's already initialized
+        if (inputHandler != null) {
+            inputHandler.setEventListener(eventListener);
+        }
     }
 
     public void bindScore(IntegerProperty integerProperty) {
