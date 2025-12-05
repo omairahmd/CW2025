@@ -17,12 +17,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
 import javafx.scene.effect.Reflection;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
+import javafx.application.Platform;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -87,6 +89,9 @@ public class GuiController implements Initializable {
     private GridPane brickPanel;
 
     @FXML
+    private BorderPane gameBoard;
+
+    @FXML
     private GameOverPanel gameOverPanel;
 
     private Rectangle[][] displayMatrix;
@@ -115,6 +120,65 @@ public class GuiController implements Initializable {
         reflection.setFraction(REFLECTION_FRACTION);
         reflection.setTopOpacity(REFLECTION_TOP_OPACITY);
         reflection.setTopOffset(REFLECTION_TOP_OFFSET);
+        
+        // Center the game board horizontally
+        centerGameBoard();
+        
+        // Center the game over panel horizontally
+        centerGameOverPanel();
+    }
+    
+    /**
+     * Centers the game board horizontally in the window.
+     * Calculates the center position based on window width and board dimensions.
+     */
+    private void centerGameBoard() {
+        if (gameBoard == null) {
+            return; // Safety check
+        }
+        
+        // Game window width (from MainMenuController when loading game)
+        final double GAME_WINDOW_WIDTH = 500.0;
+        
+        // Calculate board width: 10 columns * BRICK_SIZE + gaps + border
+        // 10 columns * 20px = 200px, 9 gaps * 1px = 9px, border 12px each side = 24px
+        final double BOARD_GRID_WIDTH = 10 * BRICK_SIZE + 9 * 1; // 209px
+        final double BORDER_WIDTH = 12.0 * 2; // 24px (12px on each side)
+        final double TOTAL_BOARD_WIDTH = BOARD_GRID_WIDTH + BORDER_WIDTH; // ~233px
+        
+        // Center horizontally
+        final double CENTER_X = (GAME_WINDOW_WIDTH - TOTAL_BOARD_WIDTH) / 2.0;
+        gameBoard.setLayoutX(CENTER_X);
+    }
+    
+    /**
+     * Centers the game over panel horizontally relative to the game board center.
+     * This ensures the panel appears centered over the game board.
+     */
+    private void centerGameOverPanel() {
+        if (groupNotification == null || gameBoard == null) {
+            return; // Safety check
+        }
+        
+        // Calculate the center of the game board
+        double gameBoardLeft = gameBoard.getLayoutX();
+        double gameBoardWidth = 10 * BRICK_SIZE + 9 * 1 + 12 * 2; // Grid + gaps + borders
+        double gameBoardCenterX = gameBoardLeft + gameBoardWidth / 2.0;
+        
+        // Use Platform.runLater to get actual panel width after layout, or use estimate
+        Platform.runLater(() -> {
+            double panelWidth;
+            if (gameOverPanel != null && gameOverPanel.getBoundsInParent().getWidth() > 0) {
+                // Use actual width from bounds
+                panelWidth = gameOverPanel.getBoundsInParent().getWidth();
+            } else {
+                // Estimate: "GAME OVER" text at 48px font size with padding
+                panelWidth = 300.0;
+            }
+            
+            // Center the panel relative to the game board center
+            groupNotification.setLayoutX(gameBoardCenterX - panelWidth / 2.0);
+        });
     }
 
     /**
@@ -180,7 +244,10 @@ public class GuiController implements Initializable {
                 brickPanel.add(rectangle, j, i);
             }
         }
-        brickPanel.setLayoutX(gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
+        // Calculate gamePanel's absolute X position
+        // gameBoard is centered, gamePanel is in BorderPane center (layoutX = 0), add border width
+        double gamePanelAbsoluteX = (gameBoard != null ? gameBoard.getLayoutX() : 0) + 12; // BorderPane border width
+        brickPanel.setLayoutX(gamePanelAbsoluteX + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
         brickPanel.setLayoutY(BRICK_PANEL_Y_OFFSET + gamePanel.getLayoutY() + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
     }
 
@@ -219,7 +286,10 @@ public class GuiController implements Initializable {
      */
     public void refreshBrick(ViewData brick) {
         if (isPause.getValue() == Boolean.FALSE) {
-            brickPanel.setLayoutX(gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
+            // Calculate gamePanel's absolute X position
+            // gameBoard is centered, gamePanel is in BorderPane center (layoutX = 0), add border width
+            double gamePanelAbsoluteX = (gameBoard != null ? gameBoard.getLayoutX() : 0) + 12; // BorderPane border width
+            brickPanel.setLayoutX(gamePanelAbsoluteX + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
             brickPanel.setLayoutY(BRICK_PANEL_Y_OFFSET + gamePanel.getLayoutY() + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
             for (int i = 0; i < brick.getBrickData().length; i++) {
                 for (int j = 0; j < brick.getBrickData()[i].length; j++) {
@@ -277,6 +347,8 @@ public class GuiController implements Initializable {
         timeLine.stop();
         gameOverPanel.setVisible(true);
         isGameOver.setValue(Boolean.TRUE);
+        // Re-center the panel when it becomes visible to ensure accurate positioning
+        centerGameOverPanel();
     }
 
     public void newGame(ActionEvent actionEvent) {
