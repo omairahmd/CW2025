@@ -27,29 +27,32 @@
     <!-- Overlay for buttons - Must be last to be on top -->
     <VBox fx:id="buttonsOverlay"
           alignment="CENTER" 
-          spacing="20">
+          spacing="15">
+        <VBox.margin>
+            <Insets top="120" right="0" bottom="0" left="0"/>
+        </VBox.margin>
         
         <!-- Menu Buttons -->
         <Button fx:id="startButton" 
                 text="Start" 
                 onAction="#handleStart"
                 styleClass="menu-button"
-                prefWidth="200" 
-                prefHeight="50"/>
+                prefWidth="160" 
+                prefHeight="40"/>
         
         <Button fx:id="settingsButton" 
                 text="Settings" 
                 onAction="#handleSettings"
                 styleClass="menu-button"
-                prefWidth="200" 
-                prefHeight="50"/>
+                prefWidth="160" 
+                prefHeight="40"/>
         
         <Button fx:id="quitButton" 
                 text="Quit" 
                 onAction="#handleQuit"
                 styleClass="menu-button"
-                prefWidth="200" 
-                prefHeight="50"/>
+                prefWidth="160" 
+                prefHeight="40"/>
     </VBox>
     
     <stylesheets>

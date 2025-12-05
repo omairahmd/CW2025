@@ -72,29 +72,36 @@
 }
 
 .menu-button {
-    -fx-font-family: "Let's go Digital";
-    -fx-font-size: 24px;
+    -fx-font-family: "Modern Tetris";
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
-    -fx-text-fill: white;
-    -fx-background-color: linear-gradient(#686868 0%, #232723 25%, #373837 75%, #757575 100%),
-    linear-gradient(#020b02, #3a3a3a),
-    linear-gradient(#9d9e9d 0%, #6b6a6b 20%, #343534 80%, #242424 100%),
-    linear-gradient(#8a8a8a 0%, #6b6a6b 20%, #343534 80%, #262626 100%),
-    linear-gradient(#777777 0%, #606060 50%, #505250 51%, #2a2b2a 100%);
-    -fx-background-insets: 0, 1, 4, 5, 6;
-    -fx-background-radius: 9, 8, 5, 4, 3;
-    -fx-padding: 10 20 10 20;
-    -fx-effect: dropshadow(three-pass-box, rgba(255, 255, 255, 0.3), 2, 0.0, 0, 2);
+    -fx-text-fill: #e2ba45; /* Golden yellow color */
+    -fx-background-color: #133436; /* Dark teal/cyan color */
+    -fx-background-radius: 5;
+    -fx-border-color: #5a9a2f; /* Darker green border */
+    -fx-border-width: 2px;
+    -fx-border-radius: 5;
+    -fx-padding: 8 16 8 16;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 5, 0, 0, 1);
     -fx-cursor: hand;
 }
 
 .menu-button:hover {
-    -fx-effect: dropshadow(three-pass-box, rgba(255, 255, 255, 0.5), 4, 0.0, 0, 4);
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 7, 0, 0, 2);
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
+    -fx-text-fill: #f0c966; /* Slightly brighter golden yellow on hover */
+    -fx-background-color: #1a4a4d; /* Slightly lighter teal on hover */
 }
 
 .menu-button:pressed {
     -fx-scale-x: 0.95;
     -fx-scale-y: 0.95;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.4), 3, 0, 0, 1);
+    -fx-background-color: #0d2527; /* Darker teal when pressed */
+}
+
+/* Settings button - only font size is different */
+#settingsButton {
+    -fx-font-size: 18px;
 }

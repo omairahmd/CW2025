@@ -39,11 +39,27 @@ public class MainMenuController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Load the Modern Tetris font
+        try {
+            javafx.scene.text.Font font = javafx.scene.text.Font.loadFont(
+                getClass().getClassLoader().getResource("modern-tetris.otf").toExternalForm(),
+                22
+            );
+            if (font != null) {
+                System.out.println("Modern Tetris font loaded successfully. Font family: " + font.getFamily());
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading Modern Tetris font: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
         // Load and play the video background
         try {
             // Try different possible file names (new file first, then fallbacks)
             String[] possibleNames = {
-                "MainMenuVideo.mp4",  // New file with proper naming
+                "MainMenuBackground.mp4",  // Main menu background video
+                "Video_Generation_With_Specific_Requirements.mp4",  // Previous video
+                "MainMenuVideo.mp4",  // Older file
                 "main_menu_video.mp4",
                 "main menu video.mp4",
                 "main%20menu%20video.mp4"
@@ -60,7 +76,13 @@ public class MainMenuController implements Initializable {
             
             if (videoUrl == null) {
                 // Try direct file path
-                videoUrl = getClass().getResource("/MainMenuVideo.mp4");
+                videoUrl = getClass().getResource("/MainMenuBackground.mp4");
+                if (videoUrl == null) {
+                    videoUrl = getClass().getResource("/Video_Generation_With_Specific_Requirements.mp4");
+                }
+                if (videoUrl == null) {
+                    videoUrl = getClass().getResource("/MainMenuVideo.mp4");
+                }
                 if (videoUrl == null) {
                     videoUrl = getClass().getResource("/main menu video.mp4");
                 }
