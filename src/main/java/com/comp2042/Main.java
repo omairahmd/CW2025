@@ -37,7 +37,7 @@ public class Main extends Application {
         primaryStage.setTitle(APP_TITLE);
         Scene scene = new Scene(root, MENU_WIDTH, MENU_HEIGHT);
         primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
+        primaryStage.setResizable(true); // Allow window resizing
         primaryStage.show();
     }
 

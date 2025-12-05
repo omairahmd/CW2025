@@ -17,8 +17,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
 import javafx.scene.effect.Reflection;
+import javafx.scene.control.Label;
+import javafx.beans.value.ChangeListener;
+import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
@@ -90,9 +94,15 @@ public class GuiController implements Initializable {
 
     @FXML
     private BorderPane gameBoard;
+    
+    @FXML
+    private Pane rootPane; // The root Pane from FXML
 
     @FXML
     private GameOverPanel gameOverPanel;
+    
+    @FXML
+    private Label scoreLabel;
 
     private Rectangle[][] displayMatrix;
 
@@ -126,19 +136,60 @@ public class GuiController implements Initializable {
         
         // Center the game over panel horizontally
         centerGameOverPanel();
+        
+        // Add listener to recenter when window is resized
+        setupResizeListener();
+    }
+    
+    /**
+     * Sets up a listener to recenter elements when the window is resized.
+     */
+    private void setupResizeListener() {
+        if (rootPane != null) {
+            // Get the scene and listen for width changes
+            rootPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene != null) {
+                    // Listen to scene width changes
+                    newScene.widthProperty().addListener((widthObs, oldWidth, newWidth) -> {
+                        centerGameBoard();
+                        centerGameOverPanel();
+                        centerScoreLabel();
+                    });
+                    // Initial centering
+                    Platform.runLater(() -> {
+                        centerGameBoard();
+                        centerGameOverPanel();
+                        centerScoreLabel();
+                    });
+                }
+            });
+            
+            // If scene already exists, set up listener immediately
+            Scene scene = rootPane.getScene();
+            if (scene != null) {
+                scene.widthProperty().addListener((obs, oldWidth, newWidth) -> {
+                    centerGameBoard();
+                    centerGameOverPanel();
+                    centerScoreLabel();
+                });
+            }
+        }
     }
     
     /**
      * Centers the game board horizontally in the window.
-     * Calculates the center position based on window width and board dimensions.
+     * Calculates the center position based on actual window width and board dimensions.
      */
     private void centerGameBoard() {
         if (gameBoard == null) {
             return; // Safety check
         }
         
-        // Game window width (from MainMenuController when loading game)
-        final double GAME_WINDOW_WIDTH = 500.0;
+        // Get actual window width from scene
+        double windowWidth = getWindowWidth();
+        if (windowWidth <= 0) {
+            return; // Scene not ready yet
+        }
         
         // Calculate board width: 10 columns * BRICK_SIZE + gaps + border
         // 10 columns * 20px = 200px, 9 gaps * 1px = 9px, border 12px each side = 24px
@@ -147,8 +198,23 @@ public class GuiController implements Initializable {
         final double TOTAL_BOARD_WIDTH = BOARD_GRID_WIDTH + BORDER_WIDTH; // ~233px
         
         // Center horizontally
-        final double CENTER_X = (GAME_WINDOW_WIDTH - TOTAL_BOARD_WIDTH) / 2.0;
+        final double CENTER_X = (windowWidth - TOTAL_BOARD_WIDTH) / 2.0;
         gameBoard.setLayoutX(CENTER_X);
+    }
+    
+    /**
+     * Gets the current window width from the scene.
+     * 
+     * @return the window width, or 500.0 as fallback if scene is not available
+     */
+    private double getWindowWidth() {
+        if (rootPane != null) {
+            Scene scene = rootPane.getScene();
+            if (scene != null) {
+                return scene.getWidth();
+            }
+        }
+        return 500.0; // Default fallback
     }
     
     /**
@@ -179,6 +245,26 @@ public class GuiController implements Initializable {
             // Center the panel relative to the game board center
             groupNotification.setLayoutX(gameBoardCenterX - panelWidth / 2.0);
         });
+    }
+    
+    /**
+     * Centers the score label on the right side of the window.
+     */
+    private void centerScoreLabel() {
+        if (scoreLabel == null) {
+            return; // Safety check
+        }
+        
+        double windowWidth = getWindowWidth();
+        if (windowWidth <= 0) {
+            return; // Scene not ready yet
+        }
+        
+        // Position score label on the right side with some margin
+        // Estimate label width (will be calculated dynamically if needed)
+        double labelWidth = 150.0; // Approximate width for "Score: 9999"
+        double margin = 20.0;
+        scoreLabel.setLayoutX(windowWidth - labelWidth - margin);
     }
 
     /**
@@ -340,7 +426,19 @@ public class GuiController implements Initializable {
         }
     }
 
+    /**
+     * Binds the score property to the score label display.
+     * Updates the label text whenever the score changes.
+     *
+     * @param integerProperty the score property to bind to
+     */
     public void bindScore(IntegerProperty integerProperty) {
+        if (scoreLabel != null && integerProperty != null) {
+            // Bind the label text to the score property
+            scoreLabel.textProperty().bind(
+                javafx.beans.binding.Bindings.concat("Score: ", integerProperty.asString())
+            );
+        }
     }
 
     public void gameOver() {

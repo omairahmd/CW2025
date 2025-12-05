@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 <?import java.net.URL?>
-<Pane fx:controller="com.comp2042.view.GuiController"
+<Pane fx:id="rootPane" fx:controller="com.comp2042.view.GuiController"
       xmlns:fx="http://javafx.com/fxml">
     <GridPane fx:id="brickPanel" vgap="1" hgap="1"/>
     <BorderPane styleClass="gameBoard" fx:id="gameBoard">
@@ -20,6 +20,10 @@
             <GameOverPanel fx:id="gameOverPanel"/>
         </VBox>
     </Group>
+    
+    <!-- Score display label - positioned on the right side -->
+    <Label fx:id="scoreLabel" text="Score: 0" styleClass="scoreClass" layoutX="350" layoutY="20"/>
+    
     <stylesheets>
         <URL value="@window_style.css"/>
     </stylesheets>
