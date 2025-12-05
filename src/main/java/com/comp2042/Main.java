@@ -14,11 +14,11 @@ import java.util.ResourceBundle;
 public class Main extends Application {
 
     // Window dimensions
-    /** Width of the application window in pixels */
-    private static final int WINDOW_WIDTH = 300;
+    /** Width of the main menu window in pixels */
+    private static final int MENU_WIDTH = 500;
     
-    /** Height of the application window in pixels */
-    private static final int WINDOW_HEIGHT = 510;
+    /** Height of the main menu window in pixels */
+    private static final int MENU_HEIGHT = 510;
     
     // Application title
     /** Title displayed in the application window */
@@ -26,18 +26,19 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
-        URL location = getClass().getClassLoader().getResource("gameLayout.fxml");
+        // Load the main menu
+        URL location = getClass().getClassLoader().getResource("mainMenuLayout.fxml");
         ResourceBundle resources = null;
         FXMLLoader fxmlLoader = new FXMLLoader(location, resources);
         Parent root = fxmlLoader.load();
-        GuiController c = fxmlLoader.getController();
+        com.comp2042.view.MainMenuController menuController = fxmlLoader.getController();
+        menuController.setPrimaryStage(primaryStage);
 
         primaryStage.setTitle(APP_TITLE);
-        Scene scene = new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
+        Scene scene = new Scene(root, MENU_WIDTH, MENU_HEIGHT);
         primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
         primaryStage.show();
-        new GameController(c);
     }
 
 

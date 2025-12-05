@@ -1,0 +1,59 @@
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.media.MediaView?>
+<?import javafx.scene.media.Media?>
+<?import java.net.URL?>
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.comp2042.view.MainMenuController"
+           prefWidth="500"
+           prefHeight="510">
+    
+    <!-- Fallback background if video doesn't load (shown by default, hidden when video plays) -->
+    <Region fx:id="fallbackBackground" 
+            style="-fx-background-color: #1a1a2e; -fx-background-image: url('background_image.png'); -fx-background-size: cover;"/>
+    
+    <!-- Video Background (will be shown when video loads) - After fallback so it's on top -->
+    <MediaView fx:id="videoBackground" 
+               fitWidth="500" 
+               fitHeight="510" 
+               preserveRatio="false"
+               visible="false"
+               pickOnBounds="false"
+               mouseTransparent="true"/>
+    
+    <!-- Overlay for buttons - Must be last to be on top -->
+    <VBox fx:id="buttonsOverlay"
+          alignment="CENTER" 
+          spacing="20">
+        
+        <!-- Menu Buttons -->
+        <Button fx:id="startButton" 
+                text="Start" 
+                onAction="#handleStart"
+                styleClass="menu-button"
+                prefWidth="200" 
+                prefHeight="50"/>
+        
+        <Button fx:id="settingsButton" 
+                text="Settings" 
+                onAction="#handleSettings"
+                styleClass="menu-button"
+                prefWidth="200" 
+                prefHeight="50"/>
+        
+        <Button fx:id="quitButton" 
+                text="Quit" 
+                onAction="#handleQuit"
+                styleClass="menu-button"
+                prefWidth="200" 
+                prefHeight="50"/>
+    </VBox>
+    
+    <stylesheets>
+        <URL value="@window_style.css"/>
+    </stylesheets>
+</StackPane>
+
