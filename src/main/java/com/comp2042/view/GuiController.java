@@ -59,6 +59,9 @@ public class GuiController implements Initializable {
     /** Vertical offset for positioning the brick panel relative to game panel */
     private static final double BRICK_PANEL_Y_OFFSET = -42.0;
     
+    /** Pixel offset adjustment for ghost piece Y position (fine-tune in pixels) */
+    private static final double GHOST_Y_PIXEL_ADJUSTMENT = 10.5; // Half a row offset (half of 21px = 20px brick + 1px gap)
+    
     // Animation timing
     /** Duration in milliseconds for automatic brick drop animation */
     private static final int AUTO_DROP_INTERVAL_MS = 400;
@@ -97,6 +100,9 @@ public class GuiController implements Initializable {
 
     @FXML
     private GridPane brickPanel;
+    
+    @FXML
+    private GridPane ghostPanel; // Ghost piece panel
 
     @FXML
     private BorderPane gameBoard;
@@ -126,6 +132,8 @@ public class GuiController implements Initializable {
     private InputEventListener eventListener;
 
     private Rectangle[][] rectangles;
+    
+    private Rectangle[][] ghostRectangles; // Ghost piece rectangles
 
     private Timeline timeLine;
 
@@ -476,13 +484,48 @@ public class GuiController implements Initializable {
      * @param brick the ViewData containing brick shape and position information
      */
     private void initializeFallingBrick(ViewData brick) {
+        // Clear existing rectangles if any
+        if (brickPanel != null) {
+            brickPanel.getChildren().clear();
+        }
+        if (ghostPanel != null) {
+            ghostPanel.getChildren().clear();
+        }
+        
         rectangles = new Rectangle[brick.getBrickData().length][brick.getBrickData()[0].length];
+        ghostRectangles = new Rectangle[brick.getBrickData().length][brick.getBrickData()[0].length];
+        
         for (int i = 0; i < brick.getBrickData().length; i++) {
             for (int j = 0; j < brick.getBrickData()[i].length; j++) {
+                // Create regular brick rectangle
                 Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
                 rectangle.setFill(getFillColor(brick.getBrickData()[i][j]));
                 rectangles[i][j] = rectangle;
                 brickPanel.add(rectangle, j, i);
+                
+                // Create ghost piece rectangle (semi-transparent)
+                Rectangle ghostRectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+                if (brick.getBrickData()[i][j] != 0) {
+                    // Make ghost piece semi-transparent (30% opacity)
+                    Paint ghostColor = getFillColor(brick.getBrickData()[i][j]);
+                    if (ghostColor instanceof Color) {
+                        Color originalColor = (Color) ghostColor;
+                        ghostRectangle.setFill(new Color(
+                            originalColor.getRed(),
+                            originalColor.getGreen(),
+                            originalColor.getBlue(),
+                            0.3 // 30% opacity for ghost effect
+                        ));
+                    } else {
+                        ghostRectangle.setFill(Color.rgb(255, 255, 255, 0.3));
+                    }
+                    ghostRectangle.setStroke(Color.WHITE);
+                    ghostRectangle.setStrokeWidth(1);
+                } else {
+                    ghostRectangle.setFill(Color.TRANSPARENT);
+                }
+                ghostRectangles[i][j] = ghostRectangle;
+                ghostPanel.add(ghostRectangle, j, i);
             }
         }
         // Calculate gamePanel's absolute X position
@@ -532,9 +575,78 @@ public class GuiController implements Initializable {
             double gamePanelAbsoluteX = (gameBoard != null ? gameBoard.getLayoutX() : 0) + 12; // BorderPane border width
             brickPanel.setLayoutX(gamePanelAbsoluteX + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
             brickPanel.setLayoutY(BRICK_PANEL_Y_OFFSET + gamePanel.getLayoutY() + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
+            
+            // Update regular brick display
             for (int i = 0; i < brick.getBrickData().length; i++) {
                 for (int j = 0; j < brick.getBrickData()[i].length; j++) {
                     setRectangleData(brick.getBrickData()[i][j], rectangles[i][j]);
+                }
+            }
+            
+            // Update ghost piece position and display
+            updateGhostPiece(brick);
+        }
+    }
+    
+    /**
+     * Updates the ghost piece display to show where the current brick will land.
+     * 
+     * @param brick the current brick ViewData
+     */
+    private void updateGhostPiece(ViewData brick) {
+        if (ghostPanel == null || ghostRectangles == null || board == null) {
+            return;
+        }
+        
+        // Get ghost Y position (where the brick will land)
+        int ghostY = board.getGhostPieceY();
+        int currentX = brick.getxPosition();
+        int currentY = brick.getyPosition();
+        
+        // Only show ghost piece if it's different from current position (brick is falling)
+        if (ghostY == currentY) {
+            // Hide ghost piece if already at landing position
+            ghostPanel.setVisible(false);
+            return;
+        }
+        
+        // Show ghost piece
+        ghostPanel.setVisible(true);
+        
+        // Calculate gamePanel's absolute X position (same as regular brick)
+        double gamePanelAbsoluteX = (gameBoard != null ? gameBoard.getLayoutX() : 0) + 12;
+        
+        // Position ghost panel at ghost Y position
+        // Use the EXACT same calculation as brickPanel (matching the existing pattern)
+        // Note: brickPanel uses getVgap() for X and getHgap() for Y (matching line 531-532)
+        double baseY = BRICK_PANEL_Y_OFFSET + gamePanel.getLayoutY() + ghostY * brickPanel.getHgap() + ghostY * BRICK_SIZE;
+        ghostPanel.setLayoutX(gamePanelAbsoluteX + currentX * brickPanel.getVgap() + currentX * BRICK_SIZE);
+        ghostPanel.setLayoutY(baseY + GHOST_Y_PIXEL_ADJUSTMENT);
+        
+        // Update ghost rectangles to match brick shape
+        for (int i = 0; i < brick.getBrickData().length; i++) {
+            for (int j = 0; j < brick.getBrickData()[i].length; j++) {
+                if (ghostRectangles[i][j] != null) {
+                    if (brick.getBrickData()[i][j] != 0) {
+                        // Make ghost piece semi-transparent (30% opacity)
+                        Paint ghostColor = getFillColor(brick.getBrickData()[i][j]);
+                        if (ghostColor instanceof Color) {
+                            Color originalColor = (Color) ghostColor;
+                            ghostRectangles[i][j].setFill(new Color(
+                                originalColor.getRed(),
+                                originalColor.getGreen(),
+                                originalColor.getBlue(),
+                                0.3 // 30% opacity for ghost effect
+                            ));
+                        } else {
+                            ghostRectangles[i][j].setFill(Color.rgb(255, 255, 255, 0.3));
+                        }
+                        ghostRectangles[i][j].setStroke(Color.WHITE);
+                        ghostRectangles[i][j].setStrokeWidth(1);
+                        ghostRectangles[i][j].setVisible(true);
+                    } else {
+                        ghostRectangles[i][j].setVisible(false);
+                    }
                 }
             }
         }

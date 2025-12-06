@@ -144,5 +144,31 @@ public class SimpleBoard implements Board {
     public List<Brick> getNextBricks(int count) {
         return brickGenerator.getNextBricks(count);
     }
+    
+    @Override
+    public int getGhostPieceY() {
+        if (currentOffset == null) {
+            return BRICK_SPAWN_Y;
+        }
+        
+        // Save the current position values (not the reference, since GamePoint is immutable)
+        int savedX = currentOffset.getX();
+        int savedY = currentOffset.getY();
+        
+        // Simulate dropping the brick by repeatedly calling moveBrickDown() until it returns false
+        // This is the EXACT same logic that determines where the brick will land
+        // Keep moving down until we can't move anymore
+        while (moveBrickDown()) {
+            // Keep moving down - ghostY will be updated to currentOffset.getY() after each successful move
+        }
+        
+        // After the loop, currentOffset.getY() is the landing position (where brick can't move down)
+        int ghostY = currentOffset.getY();
+        
+        // Restore the original position (we don't want to actually move the brick)
+        currentOffset = new GamePoint(savedX, savedY);
+        
+        return ghostY;
+    }
 }
 

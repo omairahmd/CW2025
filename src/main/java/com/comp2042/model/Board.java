@@ -39,5 +39,13 @@ public interface Board {
      * @return a list of the next N bricks
      */
     List<Brick> getNextBricks(int count);
+    
+    /**
+     * Calculates the Y position where the current brick will land (ghost piece position).
+     * Drops the brick down until it hits the bottom or another block.
+     * 
+     * @return the Y coordinate where the brick will land, or the current Y if already at bottom
+     */
+    int getGhostPieceY();
 }
 
