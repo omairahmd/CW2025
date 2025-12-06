@@ -4,6 +4,7 @@ import com.comp2042.logic.bricks.Brick;
 import com.comp2042.model.ClearRow;
 import com.comp2042.model.Score;
 import com.comp2042.model.ViewData;
+import javafx.beans.property.IntegerProperty;
 
 import java.util.List;
 
@@ -56,5 +57,13 @@ public interface Board {
      * @return the number of rows the brick was dropped (for scoring purposes)
      */
     int hardDrop();
+    
+    /**
+     * Returns the level property for binding to UI.
+     * Level starts at 1 and increments every 10 cleared lines.
+     * 
+     * @return the IntegerProperty representing the current level
+     */
+    IntegerProperty levelProperty();
 }
 

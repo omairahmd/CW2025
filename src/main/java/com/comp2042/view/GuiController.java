@@ -129,6 +129,9 @@ public class GuiController implements Initializable {
     private VBox scoreContainer;
     
     @FXML
+    private Label levelLabel;
+    
+    @FXML
     private VBox nextBricksPanel;
     
     @FXML
@@ -809,6 +812,39 @@ public class GuiController implements Initializable {
             scoreLabel.textProperty().bind(
                 javafx.beans.binding.Bindings.concat("Score: ", integerProperty.asString())
             );
+        }
+    }
+    
+    /**
+     * Binds the level property to the level label and sets up speed adjustment based on level.
+     * The game speed increases (drop interval decreases) as the level increases.
+     * 
+     * @param levelProperty the IntegerProperty representing the current level
+     */
+    public void bindLevel(IntegerProperty levelProperty) {
+        if (levelLabel != null && levelProperty != null) {
+            // Bind the level text to the property
+            levelLabel.textProperty().bind(levelProperty.asString());
+            
+            // Add listener to adjust game speed when level changes
+            levelProperty.addListener((obs, oldVal, newVal) -> {
+                // Calculate new speed: starts at 400ms, decreases by 50ms per level
+                // Minimum speed is 100ms (level 7+)
+                double newSpeed = Math.max(100, 400 - ((newVal.intValue() - 1) * 50));
+                
+                // Stop current timeline
+                if (timeLine != null) {
+                    timeLine.stop();
+                }
+                
+                // Create new timeline with updated speed
+                timeLine = new Timeline(new KeyFrame(
+                    Duration.millis(newSpeed),
+                    ae -> moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
+                ));
+                timeLine.setCycleCount(Timeline.INDEFINITE);
+                timeLine.play();
+            });
         }
     }
 

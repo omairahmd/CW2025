@@ -68,7 +68,7 @@
 
 .scoreClass{
     -fx-font-family: "Let's go Digital";
-    -fx-font-size: 20px; /* Reduced to fit in 110px panel */
+    -fx-font-size: 16px; /* Reduced to fit in 110px panel */
     -fx-fill: yellow;
     -fx-text-fill: yellow;
 }

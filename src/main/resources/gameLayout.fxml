@@ -31,6 +31,10 @@
         <VBox fx:id="scoreContainer" spacing="8" alignment="CENTER" style="-fx-padding: 8px;">
             <Label fx:id="scoreLabel" text="0" styleClass="scoreClass"/>
             <VBox spacing="3" alignment="CENTER">
+                <Label text="LEVEL" styleClass="scoreTitle"/>
+                <Label fx:id="levelLabel" styleClass="scoreClass" text="1"/>
+            </VBox>
+            <VBox spacing="3" alignment="CENTER">
                 <Label text="HIGHSCORE" styleClass="scoreTitle"/>
                 <Label fx:id="highScoreLabel" text="0" styleClass="scoreClass"/>
             </VBox>

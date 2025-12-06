@@ -6,6 +6,8 @@ import com.comp2042.logic.bricks.RandomBrickGenerator;
 import com.comp2042.model.tetromino.BrickRotator;
 import com.comp2042.model.tetromino.NextShapeInfo;
 import com.comp2042.util.MatrixOperations;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 
 import java.util.List;
 
@@ -38,6 +40,8 @@ public class SimpleBoard implements Board {
     private int[][] currentGameMatrix;
     private GamePoint currentOffset;
     private final Score score;
+    private final IntegerProperty level = new SimpleIntegerProperty(1);
+    private int linesClearedTotal = 0;
 
     public SimpleBoard(int width, int height) {
         this.width = width;
@@ -123,6 +127,14 @@ public class SimpleBoard implements Board {
     public ClearRow clearRows() {
         ClearRow clearRow = MatrixOperations.checkRemoving(currentGameMatrix);
         currentGameMatrix = clearRow.getNewMatrix();
+        
+        // Update level based on lines cleared
+        linesClearedTotal += clearRow.getLinesRemoved();
+        int newLevel = (linesClearedTotal / 10) + 1;
+        if (newLevel > level.get()) {
+            level.set(newLevel);
+        }
+        
         return clearRow;
 
     }
@@ -137,7 +149,19 @@ public class SimpleBoard implements Board {
     public void newGame() {
         currentGameMatrix = new int[height][width];
         score.reset();
+        level.set(1);
+        linesClearedTotal = 0;
         createNewBrick();
+    }
+    
+    /**
+     * Returns the level property for binding to UI.
+     * Level starts at 1 and increments every 10 cleared lines.
+     * 
+     * @return the IntegerProperty representing the current level
+     */
+    public IntegerProperty levelProperty() {
+        return level;
     }
     
     @Override
