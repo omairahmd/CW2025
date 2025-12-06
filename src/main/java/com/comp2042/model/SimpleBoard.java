@@ -7,6 +7,8 @@ import com.comp2042.model.tetromino.BrickRotator;
 import com.comp2042.model.tetromino.NextShapeInfo;
 import com.comp2042.util.MatrixOperations;
 
+import java.util.List;
+
 public class SimpleBoard implements Board {
 
     // Movement offsets for brick translation
@@ -136,6 +138,11 @@ public class SimpleBoard implements Board {
         currentGameMatrix = new int[height][width];
         score.reset();
         createNewBrick();
+    }
+    
+    @Override
+    public List<Brick> getNextBricks(int count) {
+        return brickGenerator.getNextBricks(count);
     }
 }
 

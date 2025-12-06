@@ -107,3 +107,33 @@
 #settingsButton {
     -fx-font-size: 18px;
 }
+
+/* Jungle-themed Next Bricks Panel */
+.jungle-next-bricks-panel {
+    -fx-background-color: rgba(26, 42, 46, 0.85); /* Dark jungle green with transparency */
+    -fx-background-radius: 15px;
+    -fx-border-color: linear-gradient(#2d5a3d, #4a7c59); /* Jungle green border */
+    -fx-border-width: 3px;
+    -fx-border-radius: 15px;
+    -fx-padding: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
+}
+
+.jungle-panel-title {
+    -fx-font-family: "Let's go Digital";
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #8fbc8f; /* Light jungle green */
+    -fx-alignment: CENTER;
+    -fx-padding: 0 0 5 0;
+}
+
+.jungle-brick-preview {
+    -fx-background-color: rgba(45, 90, 61, 0.6); /* Semi-transparent jungle green */
+    -fx-background-radius: 8px;
+    -fx-border-color: #5a9a2f; /* Darker green border */
+    -fx-border-width: 2px;
+    -fx-border-radius: 8px;
+    -fx-padding: 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 4, 0, 0, 1);
+}

@@ -31,6 +31,7 @@ public class GameController implements InputEventListener {
         viewGuiController = c;
         board.createNewBrick();
         viewGuiController.setEventListener(this);
+        viewGuiController.setBoard(board); // Set board reference for next bricks display
         viewGuiController.initGameView(board.getBoardMatrix(), board.getViewData());
         viewGuiController.bindScore(board.getScore().scoreProperty());
     }

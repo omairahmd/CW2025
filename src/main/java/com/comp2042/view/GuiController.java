@@ -5,6 +5,8 @@ import com.comp2042.events.InputEventListener;
 import com.comp2042.events.MoveEvent;
 import com.comp2042.events.EventSource;
 import com.comp2042.events.EventType;
+import com.comp2042.logic.bricks.Brick;
+import com.comp2042.model.Board;
 import com.comp2042.model.DownData;
 import com.comp2042.model.ViewData;
 import javafx.animation.KeyFrame;
@@ -24,7 +26,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.geometry.Pos;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -108,8 +112,16 @@ public class GuiController implements Initializable {
     
     @FXML
     private Label scoreLabel;
+    
+    @FXML
+    private VBox nextBricksPanel;
+    
+    @FXML
+    private VBox nextBricksContainer;
 
     private Rectangle[][] displayMatrix;
+    
+    private Board board; // Reference to board for getting next bricks
 
     private InputEventListener eventListener;
 
@@ -142,6 +154,9 @@ public class GuiController implements Initializable {
         // Center the game over panel horizontally
         centerGameOverPanel();
         
+        // Position next bricks panel
+        positionNextBricksPanel();
+        
         // Add listener to recenter when window is resized
         setupResizeListener();
         
@@ -162,6 +177,7 @@ public class GuiController implements Initializable {
                         centerGameBoard();
                         centerGameOverPanel();
                         centerScoreLabel();
+                        positionNextBricksPanel();
                     });
                     // Initial centering
                     Platform.runLater(() -> {
@@ -179,6 +195,7 @@ public class GuiController implements Initializable {
                     centerGameBoard();
                     centerGameOverPanel();
                     centerScoreLabel();
+                    positionNextBricksPanel();
                 });
             }
         }
@@ -301,6 +318,81 @@ public class GuiController implements Initializable {
     }
     
     /**
+     * Positions the next bricks panel to the right of the game board.
+     */
+    private void positionNextBricksPanel() {
+        if (nextBricksPanel == null || gameBoard == null) {
+            return;
+        }
+        
+        // Position panel to the right of the game board
+        double gameBoardRight = gameBoard.getLayoutX() + (10 * BRICK_SIZE + 9 * 1 + 12 * 2);
+        double panelSpacing = 20.0; // Space between game board and panel
+        nextBricksPanel.setLayoutX(gameBoardRight + panelSpacing);
+    }
+    
+    /**
+     * Updates the display of the next 3 bricks in the side panel.
+     */
+    private void updateNextBricksDisplay() {
+        if (nextBricksContainer == null || board == null) {
+            return;
+        }
+        
+        // Clear existing brick previews
+        nextBricksContainer.getChildren().clear();
+        
+        // Get next 3 bricks
+        java.util.List<Brick> nextBricks = board.getNextBricks(3);
+        
+        // Create preview for each brick
+        for (Brick brick : nextBricks) {
+            VBox brickPreview = createBrickPreview(brick);
+            nextBricksContainer.getChildren().add(brickPreview);
+        }
+    }
+    
+    /**
+     * Creates a preview panel for a single brick with jungle theme styling.
+     * 
+     * @param brick the brick to preview
+     * @return a VBox containing the brick preview
+     */
+    private VBox createBrickPreview(Brick brick) {
+        VBox preview = new VBox(5);
+        preview.getStyleClass().add("jungle-brick-preview");
+        preview.setAlignment(Pos.CENTER);
+        
+        // Get the first shape of the brick
+        int[][] shape = brick.getShapeMatrix().get(0);
+        
+        // Create a GridPane to display the brick shape
+        GridPane brickGrid = new GridPane();
+        brickGrid.setHgap(2);
+        brickGrid.setVgap(2);
+        brickGrid.setAlignment(Pos.CENTER);
+        
+        // Scale factor to make preview smaller (about 12px per cell)
+        final double PREVIEW_CELL_SIZE = 12.0;
+        
+        // Draw the brick shape
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] != 0) {
+                    Rectangle cell = new Rectangle(PREVIEW_CELL_SIZE, PREVIEW_CELL_SIZE);
+                    cell.setFill(getFillColor(shape[i][j]));
+                    cell.setArcWidth(2);
+                    cell.setArcHeight(2);
+                    brickGrid.add(cell, j, i);
+                }
+            }
+        }
+        
+        preview.getChildren().add(brickGrid);
+        return preview;
+    }
+    
+    /**
      * Centers the score label on the right side of the window.
      */
     private void centerScoreLabel() {
@@ -347,6 +439,16 @@ public class GuiController implements Initializable {
         initializeBackgroundGrid(boardMatrix);
         initializeFallingBrick(brick);
         setupGameLoop();
+    }
+    
+    /**
+     * Sets the board reference for accessing next bricks.
+     * 
+     * @param board the game board
+     */
+    public void setBoard(Board board) {
+        this.board = board;
+        updateNextBricksDisplay();
     }
 
     /**
@@ -444,6 +546,7 @@ public class GuiController implements Initializable {
                 setRectangleData(board[i][j], displayMatrix[i][j]);
             }
         }
+        updateNextBricksDisplay(); // Update next bricks when background is refreshed (brick locked)
     }
 
     private void setRectangleData(int color, Rectangle rectangle) {
@@ -467,6 +570,7 @@ public class GuiController implements Initializable {
                 notificationPanel.showScore(groupNotification.getChildren());
             }
             refreshBrick(downData.getViewData());
+            updateNextBricksDisplay(); // Update next bricks when a brick is placed
         }
         gamePanel.requestFocus();
     }
@@ -510,6 +614,7 @@ public class GuiController implements Initializable {
         timeLine.play();
         isPause.setValue(Boolean.FALSE);
         isGameOver.setValue(Boolean.FALSE);
+        updateNextBricksDisplay(); // Update next bricks for new game
     }
 
     public void pauseGame(ActionEvent actionEvent) {

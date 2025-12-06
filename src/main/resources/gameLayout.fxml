@@ -27,6 +27,14 @@
     <!-- Score display label - positioned on the right side -->
     <Label fx:id="scoreLabel" text="Score: 0" styleClass="scoreClass" layoutX="350" layoutY="20"/>
     
+    <!-- Next Bricks Panel - Jungle themed side panel -->
+    <VBox fx:id="nextBricksPanel" styleClass="jungle-next-bricks-panel" layoutX="280" layoutY="60" spacing="15">
+        <Label text="NEXT" styleClass="jungle-panel-title"/>
+        <VBox fx:id="nextBricksContainer" spacing="10" alignment="CENTER">
+            <!-- Next bricks will be added here programmatically -->
+        </VBox>
+    </VBox>
+    
     <stylesheets>
         <URL value="@window_style.css"/>
     </stylesheets>
