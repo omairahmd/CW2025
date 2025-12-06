@@ -23,8 +23,10 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
@@ -97,6 +99,9 @@ public class GuiController implements Initializable {
     
     @FXML
     private Pane rootPane; // The root Pane from FXML
+    
+    @FXML
+    private Pane gridOverlay; // Overlay pane for grid lines
 
     @FXML
     private GameOverPanel gameOverPanel;
@@ -139,6 +144,9 @@ public class GuiController implements Initializable {
         
         // Add listener to recenter when window is resized
         setupResizeListener();
+        
+        // Create grid overlay for game board (after scene is ready)
+        Platform.runLater(() -> createGridOverlay());
     }
     
     /**
@@ -245,6 +253,51 @@ public class GuiController implements Initializable {
             // Center the panel relative to the game board center
             groupNotification.setLayoutX(gameBoardCenterX - panelWidth / 2.0);
         });
+    }
+    
+    /**
+     * Creates a semi-transparent grid overlay on a separate pane.
+     * The grid lines are visible but allow the background to show through.
+     */
+    private void createGridOverlay() {
+        if (gridOverlay == null || gamePanel == null) {
+            return;
+        }
+        
+        // Board dimensions: 10 columns, 23 visible rows (25 total - 2 hidden)
+        final int COLUMNS = 10;
+        final int VISIBLE_ROWS = 23; // 25 total rows - 2 hidden at top
+        
+        // Calculate grid cell size (BRICK_SIZE + gap)
+        final double CELL_SIZE = BRICK_SIZE + 1; // 20px brick + 1px gap
+        
+        // Set overlay size to match gamePanel
+        gridOverlay.setPrefSize(COLUMNS * CELL_SIZE, VISIBLE_ROWS * CELL_SIZE);
+        gridOverlay.setMaxSize(COLUMNS * CELL_SIZE, VISIBLE_ROWS * CELL_SIZE);
+        
+        // Create vertical grid lines
+        for (int col = 0; col <= COLUMNS; col++) {
+            Line verticalLine = new Line();
+            verticalLine.setStartX(col * CELL_SIZE);
+            verticalLine.setStartY(0);
+            verticalLine.setEndX(col * CELL_SIZE);
+            verticalLine.setEndY(VISIBLE_ROWS * CELL_SIZE);
+            verticalLine.setStroke(Color.rgb(255, 255, 255, 0.15)); // Semi-transparent white
+            verticalLine.setStrokeWidth(0.5);
+            gridOverlay.getChildren().add(verticalLine);
+        }
+        
+        // Create horizontal grid lines
+        for (int row = 0; row <= VISIBLE_ROWS; row++) {
+            Line horizontalLine = new Line();
+            horizontalLine.setStartX(0);
+            horizontalLine.setStartY(row * CELL_SIZE);
+            horizontalLine.setEndX(COLUMNS * CELL_SIZE);
+            horizontalLine.setEndY(row * CELL_SIZE);
+            horizontalLine.setStroke(Color.rgb(255, 255, 255, 0.15)); // Semi-transparent white
+            horizontalLine.setStrokeWidth(0.5);
+            gridOverlay.getChildren().add(horizontalLine);
+        }
     }
     
     /**
