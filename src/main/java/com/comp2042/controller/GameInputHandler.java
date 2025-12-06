@@ -25,6 +25,7 @@ public class GameInputHandler {
     private final BooleanProperty isGameOver;
     private final Consumer<ViewData> refreshBrickCallback;
     private final Consumer<MoveEvent> moveDownCallback;
+    private final Consumer<MoveEvent> hardDropCallback;
     private final Runnable newGameCallback;
 
     /**
@@ -36,6 +37,7 @@ public class GameInputHandler {
      * @param isGameOver the BooleanProperty indicating if the game is over
      * @param refreshBrickCallback callback to refresh the brick display
      * @param moveDownCallback callback to handle down movement
+     * @param hardDropCallback callback to handle hard drop
      * @param newGameCallback callback to start a new game
      */
     public GameInputHandler(
@@ -45,6 +47,7 @@ public class GameInputHandler {
             BooleanProperty isGameOver,
             Consumer<ViewData> refreshBrickCallback,
             Consumer<MoveEvent> moveDownCallback,
+            Consumer<MoveEvent> hardDropCallback,
             Runnable newGameCallback) {
         this.gamePanel = gamePanel;
         this.eventListener = eventListener;
@@ -52,6 +55,7 @@ public class GameInputHandler {
         this.isGameOver = isGameOver;
         this.refreshBrickCallback = refreshBrickCallback;
         this.moveDownCallback = moveDownCallback;
+        this.hardDropCallback = hardDropCallback;
         this.newGameCallback = newGameCallback;
     }
 
@@ -94,6 +98,11 @@ public class GameInputHandler {
                     }
                     if (keyEvent.getCode() == KeyCode.DOWN || keyEvent.getCode() == KeyCode.S) {
                         moveDownCallback.accept(new MoveEvent(EventType.DOWN, EventSource.USER));
+                        keyEvent.consume();
+                    }
+                    if (keyEvent.getCode() == KeyCode.SPACE) {
+                        // Hard drop - instantly drop the brick to the bottom
+                        hardDropCallback.accept(new MoveEvent(EventType.DOWN, EventSource.USER));
                         keyEvent.consume();
                     }
                 }

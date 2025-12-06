@@ -47,5 +47,14 @@ public interface Board {
      * @return the Y coordinate where the brick will land, or the current Y if already at bottom
      */
     int getGhostPieceY();
+    
+    /**
+     * Instantly drops the current brick to the bottom (hard drop).
+     * Moves the brick down until it can no longer move, then returns true.
+     * The brick will be at its landing position after this call.
+     * 
+     * @return the number of rows the brick was dropped (for scoring purposes)
+     */
+    int hardDrop();
 }
 

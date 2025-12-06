@@ -12,6 +12,14 @@ public interface InputEventListener {
     ViewData onRightEvent(MoveEvent event);
 
     ViewData onRotateEvent(MoveEvent event);
+    
+    /**
+     * Handles a hard drop event (instant drop to bottom).
+     * 
+     * @param event the move event that triggered the hard drop
+     * @return DownData containing information about the drop and any cleared rows
+     */
+    DownData onHardDropEvent(MoveEvent event);
 
     void createNewGame();
 }

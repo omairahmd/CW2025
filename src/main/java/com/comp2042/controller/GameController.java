@@ -22,6 +22,9 @@ public class GameController implements InputEventListener {
     // Scoring rules
     /** Points awarded for manually moving a brick down */
     private static final int MANUAL_MOVE_SCORE = 1;
+    
+    /** Points awarded per row when hard dropping a brick */
+    private static final int HARD_DROP_SCORE_PER_ROW = 2;
 
     private Board board = new SimpleBoard(BOARD_WIDTH, BOARD_HEIGHT);
 
@@ -119,7 +122,23 @@ public class GameController implements InputEventListener {
         board.rotateLeftBrick();
         return board.getViewData();
     }
-
+    
+    @Override
+    public DownData onHardDropEvent(MoveEvent event) {
+        // Hard drop the brick to the bottom
+        int rowsDropped = board.hardDrop();
+        
+        // Award score for hard drop (2 points per row)
+        if (rowsDropped > 0 && event.getEventSource() == EventSource.USER) {
+            board.getScore().add(rowsDropped * HARD_DROP_SCORE_PER_ROW);
+        }
+        
+        // The brick is now at the bottom, so it can't move down anymore
+        // Handle brick locking (merge, clear rows, etc.)
+        ClearRow clearRow = handleBrickLocked();
+        
+        return new DownData(clearRow, board.getViewData());
+    }
 
     @Override
     public void createNewGame() {

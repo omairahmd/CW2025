@@ -170,5 +170,26 @@ public class SimpleBoard implements Board {
         
         return ghostY;
     }
+    
+    @Override
+    public int hardDrop() {
+        if (currentOffset == null) {
+            return 0;
+        }
+        
+        // Save the starting Y position to calculate how many rows we dropped
+        int startY = currentOffset.getY();
+        
+        // Drop the brick down until it can't move anymore
+        // This is the same logic as getGhostPieceY(), but we actually move the brick
+        while (moveBrickDown()) {
+            // Keep moving down until we can't move anymore
+        }
+        
+        // Calculate how many rows the brick was dropped
+        int rowsDropped = currentOffset.getY() - startY;
+        
+        return rowsDropped;
+    }
 }
 

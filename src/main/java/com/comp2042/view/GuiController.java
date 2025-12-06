@@ -432,6 +432,7 @@ public class GuiController implements Initializable {
                 isGameOver,
                 this::refreshBrick,
                 this::moveDown,
+                this::hardDrop,
                 () -> newGame(null)
         );
         inputHandler.initialize();
@@ -682,6 +683,27 @@ public class GuiController implements Initializable {
                 notificationPanel.showScore(groupNotification.getChildren());
             }
             refreshBrick(downData.getViewData());
+            updateNextBricksDisplay(); // Update next bricks when a brick is placed
+        }
+        gamePanel.requestFocus();
+    }
+    
+    /**
+     * Handles the hard drop event from the input handler.
+     * This method is called when the user presses the spacebar to instantly drop the brick.
+     *
+     * @param event the MoveEvent representing the hard drop
+     */
+    public void hardDrop(MoveEvent event) {
+        if (isPause.getValue() == Boolean.FALSE) {
+            DownData downData = eventListener.onHardDropEvent(event);
+            if (downData.getClearRow() != null && downData.getClearRow().getLinesRemoved() > 0) {
+                NotificationPanel notificationPanel = new NotificationPanel("+" + downData.getClearRow().getScoreBonus());
+                groupNotification.getChildren().add(notificationPanel);
+                notificationPanel.showScore(groupNotification.getChildren());
+            }
+            refreshBrick(downData.getViewData());
+            refreshGameBackground(board.getBoardMatrix()); // Refresh background after hard drop
             updateNextBricksDisplay(); // Update next bricks when a brick is placed
         }
         gamePanel.requestFocus();
