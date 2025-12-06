@@ -83,6 +83,9 @@ public class GameController implements InputEventListener {
      */
     private void checkAndHandleGameOver() {
         if (board.createNewBrick()) {
+            // Update high score before showing game over
+            int currentScore = board.getScore().scoreProperty().getValue();
+            viewGuiController.updateHighScore(currentScore);
             viewGuiController.gameOver();
         }
     }

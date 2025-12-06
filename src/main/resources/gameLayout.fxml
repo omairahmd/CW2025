@@ -25,11 +25,21 @@
         </VBox>
     </Group>
     
-    <!-- Score display label - positioned on the right side -->
-    <Label fx:id="scoreLabel" text="Score: 0" styleClass="scoreClass" layoutX="350" layoutY="20"/>
+    <!-- Score Panel - Jungle themed left side panel -->
+    <!-- Position is bound dynamically to game board in GuiController -->
+    <VBox fx:id="scorePanel" styleClass="jungle-score-panel" alignment="CENTER" layoutY="60" spacing="5" prefWidth="110" maxWidth="110">
+        <VBox fx:id="scoreContainer" spacing="8" alignment="CENTER" style="-fx-padding: 8px;">
+            <Label fx:id="scoreLabel" text="0" styleClass="scoreClass"/>
+            <VBox spacing="3" alignment="CENTER">
+                <Label text="HIGHSCORE" styleClass="scoreTitle"/>
+                <Label fx:id="highScoreLabel" text="0" styleClass="scoreClass"/>
+            </VBox>
+        </VBox>
+    </VBox>
     
     <!-- Next Bricks Panel - Jungle themed side panel -->
-    <VBox fx:id="nextBricksPanel" styleClass="jungle-next-bricks-panel" layoutX="280" layoutY="60" spacing="15">
+    <!-- Position is bound dynamically to game board in GuiController -->
+    <VBox fx:id="nextBricksPanel" styleClass="jungle-next-bricks-panel" layoutY="60" spacing="15">
         <Label text="NEXT" styleClass="jungle-panel-title"/>
         <VBox fx:id="nextBricksContainer" spacing="10" alignment="CENTER">
             <!-- Next bricks will be added here programmatically -->

@@ -120,6 +120,15 @@ public class GuiController implements Initializable {
     private Label scoreLabel;
     
     @FXML
+    private Label highScoreLabel;
+    
+    @FXML
+    private VBox scorePanel;
+    
+    @FXML
+    private VBox scoreContainer;
+    
+    @FXML
     private VBox nextBricksPanel;
     
     @FXML
@@ -130,6 +139,8 @@ public class GuiController implements Initializable {
     private Board board; // Reference to board for getting next bricks
 
     private InputEventListener eventListener;
+    
+    private com.comp2042.util.HighScoreManager highScoreManager;
 
     private Rectangle[][] rectangles;
     
@@ -150,6 +161,10 @@ public class GuiController implements Initializable {
         gamePanel.requestFocus();
         initializeInputHandlers();
         gameOverPanel.setVisible(false);
+        
+        // Initialize high score manager and load high score
+        highScoreManager = new com.comp2042.util.HighScoreManager();
+        updateHighScoreDisplay();
 
         final Reflection reflection = new Reflection();
         reflection.setFraction(REFLECTION_FRACTION);
@@ -162,11 +177,32 @@ public class GuiController implements Initializable {
         // Center the game over panel horizontally
         centerGameOverPanel();
         
-        // Position next bricks panel
-        positionNextBricksPanel();
-        
         // Add listener to recenter when window is resized
         setupResizeListener();
+        
+        // FIX: Dynamic Layout Binding - Bind side panels to game board position
+        Platform.runLater(() -> {
+            if (gameBoard != null) {
+                double boardWidth = 10 * BRICK_SIZE + 9 * 1 + 12 * 2; // ~233px
+                double spacing = 10.0; // Gap between board and panels
+                
+                // 1. Bind Next Bricks Panel to the RIGHT of the board
+                if (nextBricksPanel != null) {
+                    nextBricksPanel.layoutXProperty().bind(
+                        gameBoard.layoutXProperty().add(boardWidth).add(spacing)
+                    );
+                }
+                
+                // 2. Bind Score Panel to the LEFT of the board
+                if (scorePanel != null) {
+                    // Calculate: BoardX - PanelWidth - Spacing
+                    // Use smaller spacing (5px) to fit in tight window
+                    scorePanel.layoutXProperty().bind(
+                        gameBoard.layoutXProperty().subtract(scorePanel.widthProperty()).subtract(5.0)
+                    );
+                }
+            }
+        });
         
         // Create grid overlay for game board (after scene is ready)
         Platform.runLater(() -> createGridOverlay());
@@ -184,14 +220,13 @@ public class GuiController implements Initializable {
                     newScene.widthProperty().addListener((widthObs, oldWidth, newWidth) -> {
                         centerGameBoard();
                         centerGameOverPanel();
-                        centerScoreLabel();
-                        positionNextBricksPanel();
+                        // Panels are now bound to game board, no manual positioning needed
                     });
                     // Initial centering
                     Platform.runLater(() -> {
                         centerGameBoard();
                         centerGameOverPanel();
-                        centerScoreLabel();
+                        // Panels are now bound to game board, no manual positioning needed
                     });
                 }
             });
@@ -202,8 +237,7 @@ public class GuiController implements Initializable {
                 scene.widthProperty().addListener((obs, oldWidth, newWidth) -> {
                     centerGameBoard();
                     centerGameOverPanel();
-                    centerScoreLabel();
-                    positionNextBricksPanel();
+                    // Panels are now bound to game board, no manual positioning needed
                 });
             }
         }
@@ -230,8 +264,16 @@ public class GuiController implements Initializable {
         final double BORDER_WIDTH = 12.0 * 2; // 24px (12px on each side)
         final double TOTAL_BOARD_WIDTH = BOARD_GRID_WIDTH + BORDER_WIDTH; // ~233px
         
-        // Center horizontally
-        final double CENTER_X = (windowWidth - TOTAL_BOARD_WIDTH) / 2.0;
+        // Account for score panel on the left (160px width + 10px margin)
+        final double SCORE_PANEL_WIDTH = 160.0;
+        final double SCORE_PANEL_MARGIN = 10.0;
+        final double LEFT_SPACE = SCORE_PANEL_WIDTH + SCORE_PANEL_MARGIN;
+        
+        // Center horizontally, but shift right to account for score panel
+        // Available space = windowWidth - left space - right space (for next bricks panel)
+        final double RIGHT_SPACE = 200.0; // Approximate space for next bricks panel
+        final double AVAILABLE_WIDTH = windowWidth - LEFT_SPACE - RIGHT_SPACE;
+        final double CENTER_X = LEFT_SPACE + (AVAILABLE_WIDTH - TOTAL_BOARD_WIDTH) / 2.0;
         gameBoard.setLayoutX(CENTER_X);
     }
     
@@ -401,23 +443,61 @@ public class GuiController implements Initializable {
     }
     
     /**
-     * Centers the score label on the right side of the window.
+     * Positions the score panel on the left side of the window.
+     * NOTE: This method is now deprecated - panels are bound to game board position.
+     * Kept for reference but no longer called.
+     */
+    @Deprecated
+    private void positionScorePanel() {
+        // Panels are now bound to game board position in initialize() method
+        // This method is kept for reference but should not be called
+    }
+    
+    /**
+     * Centers the score label relative to the game board's right edge.
+     * Positions the label to the right of the game board with a margin.
+     * This ensures the Score aligns vertically with the "Next Bricks" panel and never touches the board.
      */
     private void centerScoreLabel() {
-        if (scoreLabel == null) {
+        if (scoreLabel == null || gameBoard == null) {
             return; // Safety check
         }
         
-        double windowWidth = getWindowWidth();
-        if (windowWidth <= 0) {
-            return; // Scene not ready yet
-        }
+        // Calculate game board's right edge
+        // Board width = 10 columns * BRICK_SIZE + 9 gaps + 24px border (12px each side)
+        final double BOARD_GRID_WIDTH = 10 * BRICK_SIZE + 9; // 209px
+        final double BORDER_WIDTH = 24.0; // 12px each side
+        final double gameBoardRightEdge = gameBoard.getLayoutX() + BOARD_GRID_WIDTH + BORDER_WIDTH;
         
-        // Position score label on the right side with some margin
-        // Estimate label width (will be calculated dynamically if needed)
-        double labelWidth = 150.0; // Approximate width for "Score: 9999"
-        double margin = 20.0;
-        scoreLabel.setLayoutX(windowWidth - labelWidth - margin);
+        // Position score label to the right of the game board with 20px margin
+        scoreLabel.setLayoutX(gameBoardRightEdge + 20);
+    }
+    
+    /**
+     * Updates the high score display label.
+     */
+    private void updateHighScoreDisplay() {
+        if (highScoreLabel != null && highScoreManager != null) {
+            highScoreLabel.setText(String.valueOf(highScoreManager.getHighScore()));
+        }
+    }
+    
+    /**
+     * Updates the high score if the current score is higher.
+     * Called when the game ends.
+     * 
+     * @param currentScore the current game score
+     * @return true if a new high score was set, false otherwise
+     */
+    public boolean updateHighScore(int currentScore) {
+        if (highScoreManager != null) {
+            boolean updated = highScoreManager.updateHighScore(currentScore);
+            if (updated) {
+                updateHighScoreDisplay();
+            }
+            return updated;
+        }
+        return false;
     }
 
     /**

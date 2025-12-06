@@ -68,9 +68,15 @@
 
 .scoreClass{
     -fx-font-family: "Let's go Digital";
-    -fx-font-size: 38;
+    -fx-font-size: 20px; /* Reduced to fit in 110px panel */
     -fx-fill: yellow;
     -fx-text-fill: yellow;
+}
+
+.scoreTitle {
+    -fx-font-family: "Let's go Digital";
+    -fx-font-size: 16px; /* Small enough to fit "HIGHSCORE" in 110px */
+    -fx-text-fill: white;
 }
 
 .menu-button {
@@ -119,6 +125,20 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
 }
 
+/* Jungle-themed Score Panel - smaller and more compact */
+.jungle-score-panel {
+    -fx-background-color: rgba(26, 42, 46, 0.85); /* Dark jungle green with transparency */
+    -fx-background-radius: 15px;
+    -fx-border-color: linear-gradient(#2d5a3d, #4a7c59); /* Jungle green border */
+    -fx-border-width: 3px;
+    -fx-border-radius: 15px;
+    -fx-padding: 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
+    -fx-min-width: 110px;
+    -fx-pref-width: 110px;
+    -fx-max-width: 110px;
+}
+
 .jungle-panel-title {
     -fx-font-family: "Let's go Digital";
     -fx-font-size: 24px;
@@ -136,4 +156,20 @@
     -fx-border-radius: 8px;
     -fx-padding: 8px;
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 4, 0, 0, 1);
+}
+
+.jungle-score-label {
+    -fx-font-family: "Let's go Digital";
+    -fx-font-size: 16px;
+    -fx-text-fill: #8fbc8f; /* Light jungle green to match panel title */
+    -fx-alignment: CENTER;
+}
+
+.jungle-score-number {
+    -fx-font-family: "Let's go Digital";
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e2ba45; /* Golden yellow to match menu buttons */
+    -fx-alignment: CENTER;
+    -fx-wrap-text: true;
 }
