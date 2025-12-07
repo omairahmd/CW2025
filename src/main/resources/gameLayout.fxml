@@ -25,6 +25,14 @@
         </VBox>
     </Group>
     
+    <!-- Pause Panel - Initially hidden -->
+    <StackPane fx:id="pausePanelContainer" 
+               visible="false" 
+               managed="false"
+               alignment="CENTER">
+        <!-- Pause panel will be added programmatically -->
+    </StackPane>
+    
     <!-- Score Panel - Jungle themed left side panel -->
     <!-- Position is bound dynamically to game board in GuiController -->
     <VBox fx:id="scorePanel" styleClass="jungle-score-panel" alignment="CENTER" layoutY="60" spacing="5" prefWidth="110" maxWidth="110">

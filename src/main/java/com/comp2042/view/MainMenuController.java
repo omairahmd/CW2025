@@ -33,9 +33,13 @@ public class MainMenuController implements Initializable {
 
     @FXML
     private Button quitButton;
+    
+    @FXML
+    private javafx.scene.layout.StackPane settingsPanelContainer;
 
     private MediaPlayer mediaPlayer;
     private Stage primaryStage;
+    private SettingsPanel settingsPanel;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -105,7 +109,15 @@ public class MainMenuController implements Initializable {
                 System.out.println("Loading media from: " + videoPath);
                 
                 try {
+                    // Try to load the media with better error handling
                     Media media = new Media(videoPath);
+                    
+                    // Check if media is valid before creating player
+                    media.getMetadata().addListener((javafx.collections.MapChangeListener<String, Object>) change -> {
+                        if (change.wasAdded()) {
+                            System.out.println("Media metadata: " + change.getKey() + " = " + change.getValueAdded());
+                        }
+                    });
                 
                     mediaPlayer = new MediaPlayer(media);
                     mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop the video
@@ -136,28 +148,56 @@ public class MainMenuController implements Initializable {
                         });
                     });
                     
-                    // Handle errors gracefully
+                    // Handle errors gracefully - fail silently and use fallback background
                     mediaPlayer.setOnError(() -> {
-                        System.err.println("Video playback error: " + mediaPlayer.getError());
-                        if (mediaPlayer.getError() != null) {
-                            System.err.println("Error message: " + mediaPlayer.getError().getMessage());
-                            System.err.println("Error type: " + mediaPlayer.getError().getType());
-                        }
+                        // Silently fail and use fallback background (video codec not supported)
                         javafx.application.Platform.runLater(() -> {
                             videoBackground.setVisible(false);
                             // Show fallback background on error
                             if (fallbackBackground != null) {
                                 fallbackBackground.setVisible(true);
                             }
+                            // Stop and dispose the media player on error to prevent memory leaks
+                            if (mediaPlayer != null) {
+                                try {
+                                    mediaPlayer.stop();
+                                    mediaPlayer.dispose();
+                                } catch (Exception e) {
+                                    // Ignore disposal errors
+                                }
+                                mediaPlayer = null;
+                            }
                         });
                     });
                     
-                    // Log status changes
+                    // Add error listener to Media object as well (catches errors before player is created)
+                    media.errorProperty().addListener((obs, oldError, newError) -> {
+                        if (newError != null) {
+                            // Silently fail and use fallback background
+                            javafx.application.Platform.runLater(() -> {
+                                videoBackground.setVisible(false);
+                                if (fallbackBackground != null) {
+                                    fallbackBackground.setVisible(true);
+                                }
+                                // Don't try to play if media has errors
+                                if (mediaPlayer != null) {
+                                    try {
+                                        mediaPlayer.stop();
+                                        mediaPlayer.dispose();
+                                    } catch (Exception e) {
+                                        // Ignore disposal errors
+                                    }
+                                    mediaPlayer = null;
+                                }
+                            });
+                        }
+                    });
+                    
+                    // Log status changes (only log successful playback, not errors)
                     mediaPlayer.statusProperty().addListener((obs, oldStatus, newStatus) -> {
-                        System.out.println("MediaPlayer status changed: " + oldStatus + " -> " + newStatus);
-                        javafx.application.Platform.runLater(() -> {
-                            if (newStatus == MediaPlayer.Status.PLAYING) {
-                                System.out.println("Video is now playing - making it visible");
+                        // Only handle successful playback states, ignore DISPOSED and error states
+                        if (newStatus == MediaPlayer.Status.PLAYING) {
+                            javafx.application.Platform.runLater(() -> {
                                 videoBackground.setVisible(true);
                                 // Hide fallback background when video is playing
                                 if (fallbackBackground != null) {
@@ -167,7 +207,9 @@ public class MainMenuController implements Initializable {
                                 if (buttonsOverlay != null) {
                                     buttonsOverlay.toFront();
                                 }
-                            } else if (newStatus == MediaPlayer.Status.READY) {
+                            });
+                        } else if (newStatus == MediaPlayer.Status.READY) {
+                            javafx.application.Platform.runLater(() -> {
                                 videoBackground.setVisible(true);
                                 if (fallbackBackground != null) {
                                     fallbackBackground.setVisible(false);
@@ -176,18 +218,21 @@ public class MainMenuController implements Initializable {
                                 if (buttonsOverlay != null) {
                                     buttonsOverlay.toFront();
                                 }
-                            }
-                        });
+                            });
+                        }
+                        // Silently ignore DISPOSED and error states (handled by error listeners)
                     });
                 } catch (Exception mediaException) {
-                    System.err.println("Failed to create Media object: " + mediaException.getMessage());
-                    mediaException.printStackTrace();
+                    // Silently fail and use fallback background (video codec not supported)
                     videoBackground.setVisible(false);
+                    // Show fallback background on error
+                    if (fallbackBackground != null) {
+                        fallbackBackground.setVisible(true);
+                    }
                 }
                 
             } else {
-                System.err.println("Video file not found in resources");
-                System.err.println("Tried: " + java.util.Arrays.toString(possibleNames));
+                // No video file found - use fallback background
                 videoBackground.setVisible(false);
                 // Show fallback background if video not found
                 if (fallbackBackground != null) {
@@ -195,14 +240,57 @@ public class MainMenuController implements Initializable {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error loading video: " + e.getMessage());
-            e.printStackTrace();
+            // Silently fail and use fallback background
             videoBackground.setVisible(false);
             // Show fallback background on error
             if (fallbackBackground != null) {
                 fallbackBackground.setVisible(true);
             }
             // Continue without video if it fails to load
+        }
+        
+        // Initialize settings panel
+        initializeSettingsPanel();
+    }
+    
+    /**
+     * Initializes the settings panel and sets up its actions.
+     */
+    private void initializeSettingsPanel() {
+        if (settingsPanelContainer != null) {
+            settingsPanel = new SettingsPanel();
+            
+            // Set up back button to hide settings and show main menu buttons
+            settingsPanel.setOnBack(() -> {
+                showMainMenu();
+            });
+            
+            // Add settings panel to container
+            settingsPanelContainer.getChildren().add(settingsPanel);
+        }
+    }
+    
+    /**
+     * Shows the settings panel and hides the main menu buttons.
+     */
+    private void showSettings() {
+        if (settingsPanelContainer != null && buttonsOverlay != null) {
+            settingsPanelContainer.setVisible(true);
+            settingsPanelContainer.setManaged(true);
+            settingsPanelContainer.toFront();
+            buttonsOverlay.setVisible(false);
+        }
+    }
+    
+    /**
+     * Shows the main menu buttons and hides the settings panel.
+     */
+    private void showMainMenu() {
+        if (settingsPanelContainer != null && buttonsOverlay != null) {
+            settingsPanelContainer.setVisible(false);
+            settingsPanelContainer.setManaged(false);
+            buttonsOverlay.setVisible(true);
+            buttonsOverlay.toFront();
         }
     }
 
@@ -239,6 +327,9 @@ public class MainMenuController implements Initializable {
                 primaryStage.setScene(new Scene(root, 500, 510));
                 primaryStage.setTitle("TetrisJFX - Game");
                 
+                // Set primary stage reference in GuiController for navigation
+                guiController.setPrimaryStage(primaryStage);
+                
                 // Initialize the game
                 new com.comp2042.controller.GameController(guiController);
             }
@@ -250,13 +341,11 @@ public class MainMenuController implements Initializable {
 
     /**
      * Handles the Settings button action.
-     * Placeholder for future settings functionality.
+     * Shows the settings panel.
      */
     @FXML
     private void handleSettings() {
-        // Placeholder - can be implemented later
-        System.out.println("Settings button clicked - placeholder");
-        // TODO: Implement settings dialog
+        showSettings();
     }
 
     /**

@@ -55,6 +55,16 @@
                 prefHeight="40"/>
     </VBox>
     
+    <!-- Settings Panel - Initially hidden -->
+    <StackPane fx:id="settingsPanelContainer" 
+               visible="false" 
+               managed="false"
+               alignment="CENTER">
+        <!-- Semi-transparent overlay background -->
+        <Region style="-fx-background-color: rgba(0, 0, 0, 0.5);"/>
+        <!-- Settings panel will be added programmatically -->
+    </StackPane>
+    
     <stylesheets>
         <URL value="@window_style.css"/>
     </stylesheets>

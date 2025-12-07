@@ -132,6 +132,9 @@ public class GuiController implements Initializable {
     private Label levelLabel;
     
     @FXML
+    private StackPane pausePanelContainer;
+    
+    @FXML
     private VBox nextBricksPanel;
     
     @FXML
@@ -156,6 +159,10 @@ public class GuiController implements Initializable {
     private final BooleanProperty isGameOver = new SimpleBooleanProperty();
 
     private GameInputHandler inputHandler;
+    
+    private PausePanel pausePanel;
+    private SettingsPanel settingsPanel;
+    private javafx.stage.Stage primaryStage;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -182,6 +189,9 @@ public class GuiController implements Initializable {
         
         // Add listener to recenter when window is resized
         setupResizeListener();
+        
+        // Initialize pause panel
+        initializePausePanel();
         
         // FIX: Dynamic Layout Binding - Bind side panels to game board position
         Platform.runLater(() -> {
@@ -240,7 +250,11 @@ public class GuiController implements Initializable {
                 scene.widthProperty().addListener((obs, oldWidth, newWidth) -> {
                     centerGameBoard();
                     centerGameOverPanel();
+                    centerPausePanel();
                     // Panels are now bound to game board, no manual positioning needed
+                });
+                scene.heightProperty().addListener((obs, oldHeight, newHeight) -> {
+                    centerPausePanel();
                 });
             }
         }
@@ -518,6 +532,10 @@ public class GuiController implements Initializable {
                 this::hardDrop,
                 () -> newGame(null)
         );
+        
+        // Set up ESC key handler for pause toggle
+        inputHandler.setPauseToggleCallback(this::togglePause);
+        
         inputHandler.initialize();
     }
 
@@ -867,8 +885,177 @@ public class GuiController implements Initializable {
         updateNextBricksDisplay(); // Update next bricks for new game
     }
 
+    /**
+     * Initializes the pause panel and sets up its button actions.
+     */
+    private void initializePausePanel() {
+        if (pausePanelContainer != null) {
+            pausePanel = new PausePanel();
+            
+            // Set up Resume button
+            pausePanel.setOnResume(() -> {
+                togglePause();
+            });
+            
+            // Set up Settings button
+            pausePanel.setOnSettings(() -> {
+                showSettings();
+            });
+            
+            // Set up Main Menu button
+            pausePanel.setOnMainMenu(() -> {
+                returnToMainMenu();
+            });
+            
+            // Add pause panel to container
+            pausePanelContainer.getChildren().add(pausePanel);
+        }
+    }
+    
+    /**
+     * Toggles the pause state of the game.
+     * Shows/hides the pause panel and stops/starts the game timeline.
+     */
+    public void togglePause() {
+        if (isGameOver.getValue()) {
+            return; // Don't allow pausing when game is over
+        }
+        
+        boolean newPauseState = !isPause.getValue();
+        isPause.setValue(newPauseState);
+        
+        if (pausePanelContainer != null) {
+            pausePanelContainer.setVisible(newPauseState);
+            pausePanelContainer.setManaged(newPauseState);
+            if (newPauseState) {
+                pausePanelContainer.toFront();
+                // Center the pause panel in the window
+                centerPausePanel();
+                if (timeLine != null) {
+                    timeLine.pause();
+                }
+            } else {
+                if (timeLine != null) {
+                    timeLine.play();
+                }
+                gamePanel.requestFocus();
+            }
+        }
+    }
+    
+    /**
+     * Centers the pause panel in the window.
+     */
+    private void centerPausePanel() {
+        if (pausePanelContainer == null || rootPane == null) {
+            return;
+        }
+        
+        Platform.runLater(() -> {
+            if (rootPane.getScene() != null) {
+                double windowWidth = rootPane.getScene().getWidth();
+                double windowHeight = rootPane.getScene().getHeight();
+                
+                // Get the actual size of the pause panel container
+                double panelWidth = pausePanelContainer.getWidth();
+                double panelHeight = pausePanelContainer.getHeight();
+                
+                // If size is 0, use preferred size from CSS (400px width, 500px height)
+                if (panelWidth == 0) {
+                    panelWidth = 400;
+                }
+                if (panelHeight == 0) {
+                    panelHeight = 500;
+                }
+                
+                // Center the pause panel container
+                double centerX = (windowWidth - panelWidth) / 2.0;
+                double centerY = (windowHeight - panelHeight) / 2.0;
+                
+                pausePanelContainer.setLayoutX(centerX);
+                pausePanelContainer.setLayoutY(centerY);
+            }
+        });
+    }
+    
+    /**
+     * Shows the settings panel over the pause panel.
+     */
+    private void showSettings() {
+        if (pausePanelContainer != null && settingsPanel == null) {
+            settingsPanel = new SettingsPanel();
+            
+            // Set up Back button to return to pause menu
+            settingsPanel.setOnBack(() -> {
+                hideSettings();
+            });
+            
+            // Add settings panel to pause container (on top of pause panel)
+            pausePanelContainer.getChildren().add(settingsPanel);
+            settingsPanel.toFront();
+        } else if (settingsPanel != null) {
+            settingsPanel.setVisible(true);
+            settingsPanel.setManaged(true);
+            settingsPanel.toFront();
+        }
+    }
+    
+    /**
+     * Hides the settings panel and returns to pause menu.
+     */
+    private void hideSettings() {
+        if (settingsPanel != null) {
+            settingsPanel.setVisible(false);
+            settingsPanel.setManaged(false);
+        }
+    }
+    
+    /**
+     * Returns to the main menu from the game.
+     * Stops the game and loads the main menu scene.
+     */
+    private void returnToMainMenu() {
+        // Stop the game timeline
+        if (timeLine != null) {
+            timeLine.stop();
+        }
+        
+        // Get the primary stage
+        if (primaryStage == null && rootPane != null && rootPane.getScene() != null) {
+            primaryStage = (javafx.stage.Stage) rootPane.getScene().getWindow();
+        }
+        
+        if (primaryStage != null) {
+            try {
+                // Load the main menu
+                URL location = getClass().getClassLoader().getResource("mainMenuLayout.fxml");
+                ResourceBundle resources = null;
+                javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(location, resources);
+                javafx.scene.Parent root = fxmlLoader.load();
+                com.comp2042.view.MainMenuController menuController = fxmlLoader.getController();
+                menuController.setPrimaryStage(primaryStage);
+                
+                // Update stage to show main menu
+                primaryStage.setScene(new javafx.scene.Scene(root, 500, 510));
+                primaryStage.setTitle("TetrisJFX - Main Menu");
+            } catch (Exception e) {
+                System.err.println("Error loading main menu: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    /**
+     * Sets the primary stage reference for navigation purposes.
+     * 
+     * @param stage the primary stage
+     */
+    public void setPrimaryStage(javafx.stage.Stage stage) {
+        this.primaryStage = stage;
+    }
+
     public void pauseGame(ActionEvent actionEvent) {
-        gamePanel.requestFocus();
+        togglePause();
     }
 }
 
