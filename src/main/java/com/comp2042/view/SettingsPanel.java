@@ -1,5 +1,6 @@
 package com.comp2042.view;
 
+import com.comp2042.manager.SoundManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -35,12 +36,18 @@ public class SettingsPanel extends VBox {
         Label musicLabel = new Label("Music Volume");
         musicLabel.getStyleClass().add("settings-label");
         
-        musicVolumeSlider = new Slider(0, 100, 50);
+        musicVolumeSlider = new Slider(0, 100, 50); // Range 0-100 for display
         musicVolumeSlider.getStyleClass().add("jungle-slider");
         musicVolumeSlider.setShowTickLabels(true);
         musicVolumeSlider.setShowTickMarks(true);
         musicVolumeSlider.setMajorTickUnit(25);
         musicVolumeSlider.setBlockIncrement(5);
+        // Bind to SoundManager music volume property (convert 0-100 to 0-1)
+        musicVolumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            SoundManager.getInstance().musicVolumeProperty().set(newVal.doubleValue() / 100.0);
+        });
+        // Initialize from SoundManager (convert 0-1 to 0-100)
+        musicVolumeSlider.setValue(SoundManager.getInstance().musicVolumeProperty().get() * 100);
         
         musicBox.getChildren().addAll(musicLabel, musicVolumeSlider);
         
@@ -50,12 +57,18 @@ public class SettingsPanel extends VBox {
         Label sfxLabel = new Label("SFX Volume");
         sfxLabel.getStyleClass().add("settings-label");
         
-        sfxVolumeSlider = new Slider(0, 100, 50);
+        sfxVolumeSlider = new Slider(0, 100, 50); // Range 0-100 for display
         sfxVolumeSlider.getStyleClass().add("jungle-slider");
         sfxVolumeSlider.setShowTickLabels(true);
         sfxVolumeSlider.setShowTickMarks(true);
         sfxVolumeSlider.setMajorTickUnit(25);
         sfxVolumeSlider.setBlockIncrement(5);
+        // Bind to SoundManager SFX volume property (convert 0-100 to 0-1)
+        sfxVolumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            SoundManager.getInstance().sfxVolumeProperty().set(newVal.doubleValue() / 100.0);
+        });
+        // Initialize from SoundManager (convert 0-1 to 0-100)
+        sfxVolumeSlider.setValue(SoundManager.getInstance().sfxVolumeProperty().get() * 100);
         
         sfxBox.getChildren().addAll(sfxLabel, sfxVolumeSlider);
         

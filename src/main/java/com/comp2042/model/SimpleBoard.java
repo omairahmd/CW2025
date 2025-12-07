@@ -3,6 +3,7 @@ package com.comp2042.model;
 import com.comp2042.logic.bricks.Brick;
 import com.comp2042.logic.bricks.BrickGenerator;
 import com.comp2042.logic.bricks.RandomBrickGenerator;
+import com.comp2042.manager.SoundManager;
 import com.comp2042.model.tetromino.BrickRotator;
 import com.comp2042.model.tetromino.NextShapeInfo;
 import com.comp2042.util.MatrixOperations;
@@ -79,12 +80,20 @@ public class SimpleBoard implements Board {
 
     @Override
     public boolean moveBrickLeft() {
-        return tryMove(MOVE_LEFT_OFFSET, NO_MOVEMENT);
+        boolean success = tryMove(MOVE_LEFT_OFFSET, NO_MOVEMENT);
+        if (success) {
+            SoundManager.getInstance().playSound("move");
+        }
+        return success;
     }
 
     @Override
     public boolean moveBrickRight() {
-        return tryMove(MOVE_RIGHT_OFFSET, NO_MOVEMENT);
+        boolean success = tryMove(MOVE_RIGHT_OFFSET, NO_MOVEMENT);
+        if (success) {
+            SoundManager.getInstance().playSound("move");
+        }
+        return success;
     }
 
     @Override
@@ -96,6 +105,7 @@ public class SimpleBoard implements Board {
             return false;
         } else {
             brickRotator.setCurrentShape(nextShape.getPosition());
+            SoundManager.getInstance().playSound("move");
             return true;
         }
     }
@@ -121,6 +131,7 @@ public class SimpleBoard implements Board {
     @Override
     public void mergeBrickToBackground() {
         currentGameMatrix = MatrixOperations.merge(currentGameMatrix, brickRotator.getCurrentShape(), currentOffset.getX(), currentOffset.getY());
+        SoundManager.getInstance().playSound("land");
     }
 
     @Override

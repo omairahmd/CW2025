@@ -6,6 +6,7 @@ import com.comp2042.events.MoveEvent;
 import com.comp2042.events.EventSource;
 import com.comp2042.events.EventType;
 import com.comp2042.logic.bricks.Brick;
+import com.comp2042.manager.SoundManager;
 import com.comp2042.model.Board;
 import com.comp2042.model.DownData;
 import com.comp2042.model.ViewData;
@@ -872,6 +873,9 @@ public class GuiController implements Initializable {
         isGameOver.setValue(Boolean.TRUE);
         // Re-center the panel when it becomes visible to ensure accurate positioning
         centerGameOverPanel();
+        // Play game over sound and stop background music
+        SoundManager.getInstance().playSound("gameover");
+        SoundManager.getInstance().stopMusic();
     }
 
     public void newGame(ActionEvent actionEvent) {
@@ -883,6 +887,8 @@ public class GuiController implements Initializable {
         isPause.setValue(Boolean.FALSE);
         isGameOver.setValue(Boolean.FALSE);
         updateNextBricksDisplay(); // Update next bricks for new game
+        // Restart background music when starting a new game
+        SoundManager.getInstance().startMusic();
     }
 
     /**

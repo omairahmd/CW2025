@@ -3,6 +3,7 @@ package com.comp2042.controller;
 import com.comp2042.events.InputEventListener;
 import com.comp2042.events.MoveEvent;
 import com.comp2042.events.EventSource;
+import com.comp2042.manager.SoundManager;
 import com.comp2042.model.Board;
 import com.comp2042.model.ClearRow;
 import com.comp2042.model.DownData;
@@ -76,6 +77,7 @@ public class GameController implements InputEventListener {
     private void updateScoreForClearedRows(ClearRow clearRow) {
         if (clearRow.getLinesRemoved() > 0) {
             board.getScore().add(clearRow.getScoreBonus());
+            SoundManager.getInstance().playSound("clear");
         }
     }
 

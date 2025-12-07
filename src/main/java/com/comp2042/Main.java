@@ -1,6 +1,7 @@
 package com.comp2042;
 
 import com.comp2042.controller.GameController;
+import com.comp2042.manager.SoundManager;
 import com.comp2042.view.GuiController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -39,6 +40,9 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.setResizable(true); // Allow window resizing
         primaryStage.show();
+        
+        // Start background music
+        SoundManager.getInstance().startMusic();
     }
 
 
