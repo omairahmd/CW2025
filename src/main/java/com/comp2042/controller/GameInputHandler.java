@@ -109,8 +109,28 @@ public class GameInputHandler {
                 if (keyEvent.getCode() == KeyCode.N) {
                     newGameCallback.run();
                 }
+                // Handle ESC key for pause/unpause
+                if (keyEvent.getCode() == KeyCode.ESCAPE) {
+                    // Toggle pause state - this will be handled by GuiController
+                    // We need to pass a callback for pause toggle
+                    if (pauseToggleCallback != null) {
+                        pauseToggleCallback.run();
+                    }
+                    keyEvent.consume();
+                }
             }
         });
+    }
+    
+    private Runnable pauseToggleCallback;
+    
+    /**
+     * Sets the callback to be invoked when ESC key is pressed to toggle pause.
+     * 
+     * @param callback the Runnable to execute when pause is toggled
+     */
+    public void setPauseToggleCallback(Runnable callback) {
+        this.pauseToggleCallback = callback;
     }
 }
 
