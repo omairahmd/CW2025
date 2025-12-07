@@ -60,10 +60,30 @@
     -fx-font-weight: bold;
 }
 
-.gameOverStyle {
-    -fx-font-family: "Let's go Digital";
-    -fx-font-size: 48;
-    -fx-background-color: red;
+/* Game Over Panel Styles */
+.game-over-panel {
+    -fx-alignment: CENTER;
+    -fx-spacing: 30;
+    -fx-background-color: rgba(26, 42, 46, 0.95); /* Dark jungle green with high opacity */
+    -fx-background-radius: 15px;
+    -fx-border-color: linear-gradient(#2d5a3d, #4a7c59); /* Jungle green border */
+    -fx-border-width: 3px;
+    -fx-border-radius: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
+    -fx-min-width: 400px;
+    -fx-pref-width: 400px;
+    -fx-max-width: 400px;
+    -fx-min-height: 300px;
+    -fx-pref-height: 300px;
+    -fx-max-height: 300px;
+}
+
+.game-over-title {
+    -fx-font-family: "Modern Tetris";
+    -fx-font-size: 32px; /* Reduced to fit better */
+    -fx-font-weight: bold;
+    -fx-text-fill: #e2ba45; /* Golden yellow */
+    -fx-alignment: CENTER;
 }
 
 .scoreClass{

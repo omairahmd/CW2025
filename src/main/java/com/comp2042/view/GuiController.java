@@ -173,6 +173,10 @@ public class GuiController implements Initializable {
         initializeInputHandlers();
         gameOverPanel.setVisible(false);
         
+        // Set up game over panel button actions
+        gameOverPanel.setOnNewGame(() -> newGame(null));
+        gameOverPanel.setOnMainMenu(() -> returnToMainMenu());
+        
         // Initialize high score manager and load high score
         highScoreManager = new com.comp2042.util.HighScoreManager();
         updateHighScoreDisplay();
@@ -256,6 +260,7 @@ public class GuiController implements Initializable {
                 });
                 scene.heightProperty().addListener((obs, oldHeight, newHeight) -> {
                     centerPausePanel();
+                    centerGameOverPanel();
                 });
             }
         }
@@ -311,32 +316,39 @@ public class GuiController implements Initializable {
     }
     
     /**
-     * Centers the game over panel horizontally relative to the game board center.
-     * This ensures the panel appears centered over the game board.
+     * Centers the game over panel in the middle of the window (same as pause panel).
      */
     private void centerGameOverPanel() {
-        if (groupNotification == null || gameBoard == null) {
-            return; // Safety check
+        if (groupNotification == null || rootPane == null) {
+            return;
         }
         
-        // Calculate the center of the game board
-        double gameBoardLeft = gameBoard.getLayoutX();
-        double gameBoardWidth = 10 * BRICK_SIZE + 9 * 1 + 12 * 2; // Grid + gaps + borders
-        double gameBoardCenterX = gameBoardLeft + gameBoardWidth / 2.0;
-        
-        // Use Platform.runLater to get actual panel width after layout, or use estimate
         Platform.runLater(() -> {
-            double panelWidth;
-            if (gameOverPanel != null && gameOverPanel.getBoundsInParent().getWidth() > 0) {
-                // Use actual width from bounds
-                panelWidth = gameOverPanel.getBoundsInParent().getWidth();
-            } else {
-                // Estimate: "GAME OVER" text at 48px font size with padding
-                panelWidth = 300.0;
+            if (rootPane.getScene() != null) {
+                double windowWidth = rootPane.getScene().getWidth();
+                double windowHeight = rootPane.getScene().getHeight();
+                
+                // Get the actual size of the game over panel
+                double panelWidth = gameOverPanel != null && gameOverPanel.getBoundsInParent().getWidth() > 0 
+                    ? gameOverPanel.getBoundsInParent().getWidth() 
+                    : 400; // Default width from CSS
+                double panelHeight = gameOverPanel != null && gameOverPanel.getBoundsInParent().getHeight() > 0 
+                    ? gameOverPanel.getBoundsInParent().getHeight() 
+                    : 300; // Default height from CSS
+                
+                // Center the panel in the window
+                double centerX = (windowWidth - panelWidth) / 2.0;
+                double centerY = (windowHeight - panelHeight) / 2.0;
+                
+                groupNotification.setLayoutX(centerX);
+                groupNotification.setLayoutY(centerY);
+                
+                // Ensure game over panel is in front of other elements
+                if (gameOverPanel != null) {
+                    gameOverPanel.toFront();
+                }
+                groupNotification.toFront();
             }
-            
-            // Center the panel relative to the game board center
-            groupNotification.setLayoutX(gameBoardCenterX - panelWidth / 2.0);
         });
     }
     
@@ -873,6 +885,15 @@ public class GuiController implements Initializable {
         isGameOver.setValue(Boolean.TRUE);
         // Re-center the panel when it becomes visible to ensure accurate positioning
         centerGameOverPanel();
+        // Ensure game over panel is in front of all other elements (including next bricks panel)
+        Platform.runLater(() -> {
+            if (gameOverPanel != null) {
+                gameOverPanel.toFront();
+            }
+            if (groupNotification != null) {
+                groupNotification.toFront();
+            }
+        });
         // Play game over sound and stop background music
         SoundManager.getInstance().playSound("gameover");
         SoundManager.getInstance().stopMusic();
