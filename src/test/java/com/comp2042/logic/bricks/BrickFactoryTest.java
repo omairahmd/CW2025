@@ -18,5 +18,12 @@ class BrickFactoryTest {
     void testInvalidBrickThrows() {
         assertThrows(IllegalArgumentException.class, () -> BrickFactory.getBrick(99));
     }
+
+    @Test
+    void testSpecificType() {
+        Brick brick = BrickFactory.getBrick(BrickFactory.BRICK_TYPE_I);
+        assertNotNull(brick);
+        assertEquals("IBrick", brick.getClass().getSimpleName(), "Type 0 should produce an IBrick");
+    }
 }
 

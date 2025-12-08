@@ -26,6 +26,15 @@ public class HighScoreManager {
     private int highScore;
 
     /**
+     * Constructor for testing purposes.
+     * @param path custom path to use for high score storage
+     */
+    protected HighScoreManager(Path path) {
+        this.highScoreFilePath = path;
+        this.highScore = loadHighScore();
+    }
+
+    /**
      * Creates a new HighScoreManager and loads the high score from file.
      */
     public HighScoreManager() {
