@@ -73,6 +73,16 @@
         <!-- Mode selection panel will be added programmatically -->
     </StackPane>
     
+    <!-- Instructions Panel - Initially hidden -->
+    <StackPane fx:id="instructionsPanelContainer" 
+               visible="false" 
+               managed="false"
+               alignment="CENTER">
+        <!-- Semi-transparent overlay background -->
+        <Region style="-fx-background-color: rgba(0, 0, 0, 0.5);"/>
+        <!-- Instructions panel will be added programmatically -->
+    </StackPane>
+    
     <stylesheets>
         <URL value="@window_style.css"/>
     </stylesheets>

@@ -133,6 +133,12 @@ public class GuiController implements Initializable {
     private VBox scoreContainer;
     
     @FXML
+    private VBox controlsPanel;
+    
+    @FXML
+    private VBox controlsContainer;
+    
+    @FXML
     private Label levelLabel;
     
     @FXML
@@ -223,6 +229,11 @@ public class GuiController implements Initializable {
                     scorePanel.layoutXProperty().bind(
                         gameBoard.layoutXProperty().subtract(scorePanel.widthProperty()).subtract(5.0)
                     );
+                }
+                
+                // 3. Bind Controls Panel to the same X position as Score Panel
+                if (controlsPanel != null && scorePanel != null) {
+                    controlsPanel.layoutXProperty().bind(scorePanel.layoutXProperty());
                 }
             }
         });

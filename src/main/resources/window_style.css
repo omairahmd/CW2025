@@ -194,6 +194,44 @@
     -fx-wrap-text: true;
 }
 
+/* Jungle-themed Controls Panel - positioned below score panel */
+.jungle-controls-panel {
+    -fx-background-color: rgba(26, 42, 46, 0.85); /* Dark jungle green with transparency */
+    -fx-background-radius: 15px;
+    -fx-border-color: linear-gradient(#2d5a3d, #4a7c59); /* Jungle green border */
+    -fx-border-width: 3px;
+    -fx-border-radius: 15px;
+    -fx-padding: 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
+    -fx-min-width: 110px;
+    -fx-pref-width: 110px;
+    -fx-max-width: 110px;
+}
+
+.jungle-panel-title-small {
+    -fx-font-family: "Let's go Digital";
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #8fbc8f; /* Light jungle green */
+    -fx-alignment: CENTER;
+    -fx-padding: 0 0 5 0;
+}
+
+.controls-key {
+    -fx-font-family: "Let's go Digital";
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e2ba45; /* Golden yellow */
+    -fx-alignment: CENTER;
+}
+
+.controls-action {
+    -fx-font-family: "Let's go Digital";
+    -fx-font-size: 12px;
+    -fx-text-fill: #8fbc8f; /* Light jungle green */
+    -fx-alignment: CENTER;
+}
+
 /* Pause Panel Styles */
 .pause-panel-content {
     -fx-alignment: CENTER;
@@ -284,6 +322,73 @@
     -fx-font-size: 18px;
     -fx-text-fill: #8fbc8f; /* Light jungle green */
     -fx-alignment: CENTER;
+}
+
+/* Instructions Panel Styles */
+.instructions-panel-content {
+    -fx-alignment: CENTER;
+    -fx-spacing: 25;
+    -fx-background-color: rgba(26, 42, 46, 0.95); /* Dark jungle green with high opacity */
+    -fx-background-radius: 15px;
+    -fx-border-color: linear-gradient(#2d5a3d, #4a7c59); /* Jungle green border */
+    -fx-border-width: 3px;
+    -fx-border-radius: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
+    -fx-min-width: 400px;
+    -fx-pref-width: 400px;
+    -fx-max-width: 400px;
+    -fx-min-height: 400px;
+    -fx-pref-height: 400px;
+    -fx-max-height: 400px;
+}
+
+.instructions-title {
+    -fx-font-family: "Modern Tetris";
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e2ba45; /* Golden yellow */
+    -fx-alignment: CENTER;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+.instructions-text {
+    -fx-font-family: "Modern Tetris";
+    -fx-font-size: 12px;
+    -fx-text-fill: #8fbc8f; /* Light jungle green */
+    -fx-alignment: CENTER;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+.instructions-title-small {
+    -fx-font-family: "Modern Tetris";
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e2ba45; /* Golden yellow */
+    -fx-alignment: CENTER;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+.instructions-text-small {
+    -fx-font-family: "Modern Tetris";
+    -fx-font-size: 10px;
+    -fx-text-fill: #8fbc8f; /* Light jungle green */
+    -fx-alignment: CENTER;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+.instructions-button {
+    -fx-min-width: 140px;
+    -fx-pref-width: 140px;
+    -fx-max-width: 140px;
+    -fx-min-height: 35px;
+    -fx-pref-height: 35px;
+    -fx-max-height: 35px;
+    -fx-font-size: 14px;
+    -fx-padding: 6 12 6 12;
 }
 
 /* Jungle Slider Styles */

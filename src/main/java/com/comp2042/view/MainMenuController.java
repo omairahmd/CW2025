@@ -40,11 +40,15 @@ public class MainMenuController implements Initializable {
     
     @FXML
     private javafx.scene.layout.StackPane modeSelectionPanelContainer;
+    
+    @FXML
+    private javafx.scene.layout.StackPane instructionsPanelContainer;
 
     private MediaPlayer mediaPlayer;
     private Stage primaryStage;
     private SettingsPanel settingsPanel;
     private ModeSelectionPanel modeSelectionPanel;
+    private InstructionsPanel instructionsPanel;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -321,12 +325,59 @@ public class MainMenuController implements Initializable {
     }
     
     /**
+     * Shows the instructions panel for the selected game mode.
+     * 
+     * @param mode the game mode
+     */
+    private void showInstructions(GameMode mode) {
+        // Hide mode selection panel
+        hideModeSelection();
+        
+        // Create or update instructions panel
+        if (instructionsPanelContainer != null) {
+            // Remove existing panel if any
+            instructionsPanelContainer.getChildren().removeIf(node -> node instanceof InstructionsPanel);
+            
+            // Create new instructions panel for this mode
+            instructionsPanel = new InstructionsPanel(mode);
+            
+            // Set up button actions
+            instructionsPanel.setOnStart(() -> startGame(mode));
+            instructionsPanel.setOnBack(() -> {
+                hideInstructions();
+                showModeSelection();
+            });
+            
+            // Add to container
+            instructionsPanelContainer.getChildren().add(instructionsPanel);
+            
+            // Show the panel
+            instructionsPanelContainer.setVisible(true);
+            instructionsPanelContainer.setManaged(true);
+            instructionsPanelContainer.toFront();
+        }
+    }
+    
+    /**
+     * Hides the instructions panel.
+     */
+    private void hideInstructions() {
+        if (instructionsPanelContainer != null) {
+            instructionsPanelContainer.setVisible(false);
+            instructionsPanelContainer.setManaged(false);
+        }
+    }
+    
+    /**
      * Starts the game in the specified mode.
      * 
-     * @param mode the game mode to start (CLASSIC or ZEN)
+     * @param mode the game mode to start
      */
     private void startGame(GameMode mode) {
         try {
+            // Hide instructions panel
+            hideInstructions();
+            
             // Hide mode selection panel
             hideModeSelection();
             
@@ -373,9 +424,9 @@ public class MainMenuController implements Initializable {
      */
     private void initializeModeSelectionPanel() {
         modeSelectionPanel = new ModeSelectionPanel();
-        modeSelectionPanel.setOnClassic(() -> startGame(GameMode.CLASSIC));
-        modeSelectionPanel.setOnOvergrowth(() -> startGame(GameMode.OVERGROWTH));
-        modeSelectionPanel.setOnTreasureHunt(() -> startGame(GameMode.TREASURE_HUNT));
+        modeSelectionPanel.setOnClassic(() -> showInstructions(GameMode.CLASSIC));
+        modeSelectionPanel.setOnOvergrowth(() -> showInstructions(GameMode.OVERGROWTH));
+        modeSelectionPanel.setOnTreasureHunt(() -> showInstructions(GameMode.TREASURE_HUNT));
         if (modeSelectionPanelContainer != null) {
             modeSelectionPanelContainer.getChildren().add(modeSelectionPanel);
             modeSelectionPanelContainer.setVisible(false);
