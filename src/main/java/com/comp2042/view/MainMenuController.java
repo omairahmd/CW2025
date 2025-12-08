@@ -54,13 +54,10 @@ public class MainMenuController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // Load the Modern Tetris font
         try {
-            javafx.scene.text.Font font = javafx.scene.text.Font.loadFont(
+            javafx.scene.text.Font.loadFont(
                 getClass().getClassLoader().getResource("modern-tetris.otf").toExternalForm(),
                 22
             );
-            if (font != null) {
-                System.out.println("Modern Tetris font loaded successfully. Font family: " + font.getFamily());
-            }
         } catch (Exception e) {
             System.err.println("Error loading Modern Tetris font: " + e.getMessage());
             e.printStackTrace();
@@ -82,7 +79,6 @@ public class MainMenuController implements Initializable {
             for (String name : possibleNames) {
                 videoUrl = getClass().getClassLoader().getResource(name);
                 if (videoUrl != null) {
-                    System.out.println("Found video file: " + name);
                     break;
                 }
             }
@@ -103,9 +99,7 @@ public class MainMenuController implements Initializable {
             
             if (videoUrl != null) {
                 String videoPath = videoUrl.toExternalForm();
-                System.out.println("Video URL (original): " + videoPath);
                 
-                // Fix file:/// protocol issue on Windows
                 if (videoPath.startsWith("file:/") && !videoPath.startsWith("file:///")) {
                     videoPath = videoPath.replace("file:/", "file:///");
                 }
@@ -115,17 +109,13 @@ public class MainMenuController implements Initializable {
                     videoPath = videoPath.replace(" ", "%20");
                 }
                 
-                System.out.println("Loading media from: " + videoPath);
-                
                 try {
                     // Try to load the media with better error handling
                     Media media = new Media(videoPath);
                     
                     // Check if media is valid before creating player
                     media.getMetadata().addListener((javafx.collections.MapChangeListener<String, Object>) change -> {
-                        if (change.wasAdded()) {
-                            System.out.println("Media metadata: " + change.getKey() + " = " + change.getValueAdded());
-                        }
+                        // metadata listener retained intentionally for potential future logging
                     });
                 
                     mediaPlayer = new MediaPlayer(media);
@@ -140,7 +130,6 @@ public class MainMenuController implements Initializable {
                     
                     // Show video when it's ready
                     mediaPlayer.setOnReady(() -> {
-                        System.out.println("Video is ready, showing video background");
                         javafx.application.Platform.runLater(() -> {
                             videoBackground.setVisible(true);
                             // Hide fallback background when video is playing

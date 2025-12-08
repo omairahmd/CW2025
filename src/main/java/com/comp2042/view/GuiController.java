@@ -208,21 +208,17 @@ public class GuiController implements Initializable {
         
         // Initialize pause panel
         initializePausePanel();
-        
-        // FIX: Dynamic Layout Binding - Bind side panels to game board position
         Platform.runLater(() -> {
             if (gameBoard != null) {
                 double boardWidth = 10 * BRICK_SIZE + 9 * 1 + 12 * 2; // ~233px
                 double spacing = 10.0; // Gap between board and panels
                 
-                // 1. Bind Next Bricks Panel to the RIGHT of the board
                 if (nextBricksPanel != null) {
                     nextBricksPanel.layoutXProperty().bind(
                         gameBoard.layoutXProperty().add(boardWidth).add(spacing)
                     );
                 }
                 
-                // 2. Bind Score Panel to the LEFT of the board
                 if (scorePanel != null) {
                     // Calculate: BoardX - PanelWidth - Spacing
                     // Use smaller spacing (5px) to fit in tight window
@@ -231,7 +227,6 @@ public class GuiController implements Initializable {
                     );
                 }
                 
-                // 3. Bind Controls Panel to the same X position as Score Panel
                 if (controlsPanel != null && scorePanel != null) {
                     controlsPanel.layoutXProperty().bind(scorePanel.layoutXProperty());
                 }
@@ -858,7 +853,7 @@ public class GuiController implements Initializable {
         if (scoreLabel != null && integerProperty != null) {
             // Bind the label text to the score property
             scoreLabel.textProperty().bind(
-                javafx.beans.binding.Bindings.concat("Score: ", integerProperty.asString())
+                javafx.beans.binding.Bindings.concat("Score:\n", integerProperty.asString())
             );
         }
     }

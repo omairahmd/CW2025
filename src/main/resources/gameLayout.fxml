@@ -37,7 +37,7 @@
     <!-- Position is bound dynamically to game board in GuiController -->
     <VBox fx:id="scorePanel" styleClass="jungle-score-panel" alignment="CENTER" layoutY="60" spacing="5" prefWidth="110" maxWidth="110">
         <VBox fx:id="scoreContainer" spacing="8" alignment="CENTER" style="-fx-padding: 8px;">
-            <Label fx:id="scoreLabel" text="0" styleClass="scoreClass"/>
+            <Label fx:id="scoreLabel" text="0" styleClass="scoreClass" wrapText="true" textAlignment="CENTER" maxWidth="90"/>
             <VBox spacing="3" alignment="CENTER">
                 <Label text="LEVEL" styleClass="scoreTitle"/>
                 <Label fx:id="levelLabel" styleClass="scoreClass" text="1"/>
