@@ -1,6 +1,7 @@
 package com.comp2042.model;
 
 import com.comp2042.logic.bricks.Brick;
+import com.comp2042.logic.bricks.BrickFactory; // Added Import
 import com.comp2042.logic.bricks.BrickGenerator;
 import com.comp2042.logic.bricks.RandomBrickGenerator;
 import com.comp2042.manager.SoundManager;
@@ -16,24 +17,19 @@ import java.util.concurrent.ThreadLocalRandom;
 public class SimpleBoard implements Board {
 
     // Movement offsets for brick translation
-    /** Horizontal offset for moving brick left (negative direction) */
     private static final int MOVE_LEFT_OFFSET = -1;
-    
-    /** Horizontal offset for moving brick right (positive direction) */
     private static final int MOVE_RIGHT_OFFSET = 1;
-    
-    /** Vertical offset for moving brick down */
     private static final int MOVE_DOWN_OFFSET = 1;
-    
-    /** No movement offset (used when only one axis changes) */
     private static final int NO_MOVEMENT = 0;
 
     // Brick spawn position
-    /** X coordinate (column) where new bricks spawn */
     private static final int BRICK_SPAWN_X = 4;
-    
-    /** Y coordinate (row) where new bricks spawn */
     private static final int BRICK_SPAWN_Y = 1;
+
+    // Treasure Hunt Colors
+    private static final int DIRT_COLOR = 8;
+    private static final int GOLD_COLOR = 9;
+    private static final int VINE_COLOR = 8;
 
     private final int width;
     private final int height;
@@ -56,13 +52,65 @@ public class SimpleBoard implements Board {
     }
 
     /**
-     * Attempts to move the current brick by the specified offsets.
-     * Checks for conflicts and updates the current offset only if the move is valid.
-     *
-     * @param deltaX the horizontal offset (positive = right, negative = left)
-     * @param deltaY the vertical offset (positive = down, negative = up)
-     * @return true if the move was successful (no conflict), false otherwise
+     * Creates a new brick at the spawn position with robust error handling.
+     * * @return true if game is over (new brick collides with existing blocks), false otherwise
+     * @throws IllegalStateException if brick generation fails critically
      */
+    @Override
+    public boolean createNewBrick() {
+        try {
+            Brick currentBrick = brickGenerator.getBrick();
+
+            if (currentBrick == null) {
+                // RECOVERY: This shouldn't happen, but if it does, create a default brick
+                System.err.println("Warning: Brick generator returned null. Using fallback brick.");
+                currentBrick = BrickFactory.getBrick(BrickFactory.BRICK_TYPE_I);
+            }
+
+            brickRotator.setBrick(currentBrick);
+            currentOffset = new GamePoint(BRICK_SPAWN_X, BRICK_SPAWN_Y);
+
+            // Check if game is over (new brick collides with existing blocks)
+            boolean gameOver = MatrixOperations.intersect(
+                    currentGameMatrix,
+                    brickRotator.getCurrentShape(),
+                    currentOffset.getX(),
+                    currentOffset.getY()
+            );
+
+            if (gameOver) {
+                System.out.println("Game Over: New brick cannot be placed at spawn position.");
+            }
+
+            return gameOver;
+
+        } catch (IllegalArgumentException e) {
+            // RECOVERY: Handle invalid brick type
+            System.err.println("Error creating brick: " + e.getMessage());
+            System.err.println("Using fallback I-brick to continue game.");
+
+            // Use a safe fallback brick
+            Brick fallbackBrick = BrickFactory.getBrick(BrickFactory.BRICK_TYPE_I);
+            brickRotator.setBrick(fallbackBrick);
+            currentOffset = new GamePoint(BRICK_SPAWN_X, BRICK_SPAWN_Y);
+
+            return MatrixOperations.intersect(
+                    currentGameMatrix,
+                    brickRotator.getCurrentShape(),
+                    currentOffset.getX(),
+                    currentOffset.getY()
+            );
+
+        } catch (Exception e) {
+            // RECOVERY: Last resort - log error and signal game over
+            System.err.println("Critical error creating new brick: " + e.getMessage());
+            e.printStackTrace();
+
+            // Signal game over to prevent further errors
+            throw new IllegalStateException("Unable to create new brick. Game cannot continue.", e);
+        }
+    }
+
     private boolean tryMove(int deltaX, int deltaY) {
         int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
         GamePoint newPosition = currentOffset.translate(deltaX, deltaY);
@@ -113,14 +161,6 @@ public class SimpleBoard implements Board {
     }
 
     @Override
-    public boolean createNewBrick() {
-        Brick currentBrick = brickGenerator.getBrick();
-        brickRotator.setBrick(currentBrick);
-        currentOffset = new GamePoint(BRICK_SPAWN_X, BRICK_SPAWN_Y);
-        return MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), currentOffset.getX(), currentOffset.getY());
-    }
-
-    @Override
     public int[][] getBoardMatrix() {
         return currentGameMatrix;
     }
@@ -140,16 +180,14 @@ public class SimpleBoard implements Board {
     public ClearRow clearRows() {
         ClearRow clearRow = MatrixOperations.checkRemoving(currentGameMatrix);
         currentGameMatrix = clearRow.getNewMatrix();
-        
-        // Update level based on lines cleared
+
         linesClearedTotal += clearRow.getLinesRemoved();
         int newLevel = (linesClearedTotal / 10) + 1;
         if (newLevel > level.get()) {
             level.set(newLevel);
         }
-        
-        return clearRow;
 
+        return clearRow;
     }
 
     @Override
@@ -157,78 +195,53 @@ public class SimpleBoard implements Board {
         return score;
     }
 
-
     @Override
     public void newGame() {
         currentGameMatrix = new int[height][width];
         score.reset();
         level.set(1);
         linesClearedTotal = 0;
-        
-        // Initialize treasure field if in TREASURE_HUNT mode
+
         if (gameMode == GameMode.TREASURE_HUNT) {
             initTreasureField();
         }
-        
+
         createNewBrick();
     }
-    
-    /**
-     * Dirt color index for treasure hunt mode
-     */
-    private static final int DIRT_COLOR = 8;
-    
-    /**
-     * Gold color index for treasure hunt mode
-     */
-    private static final int GOLD_COLOR = 9;
-    
-    /**
-     * Initializes the treasure field for Treasure Hunt mode.
-     * Fills the bottom 8 rows with Dirt blocks and randomly places Gold blocks.
-     * Ensures every row has at least one empty column for playability.
-     */
+
     private void initTreasureField() {
-        // Fill bottom 8 rows with Dirt
-        int startRow = height - 8; // Start from row height-8 (bottom 8 rows)
+        int startRow = height - 8;
         for (int row = startRow; row < height; row++) {
             for (int col = 0; col < width; col++) {
                 currentGameMatrix[row][col] = DIRT_COLOR;
             }
         }
-        
-        // Randomly place 5-8 Gold blocks in the bottom 8 rows
-        int goldCount = ThreadLocalRandom.current().nextInt(5, 9); // 5 to 8 gold blocks
+
+        int goldCount = ThreadLocalRandom.current().nextInt(5, 9);
         int placedGold = 0;
-        
+
         while (placedGold < goldCount) {
             int row = ThreadLocalRandom.current().nextInt(startRow, height);
             int col = ThreadLocalRandom.current().nextInt(width);
-            
-            // Only place gold if the cell is currently dirt (not already gold)
+
             if (currentGameMatrix[row][col] == DIRT_COLOR) {
                 currentGameMatrix[row][col] = GOLD_COLOR;
                 placedGold++;
             }
         }
-        
-        // Ensure every row has at least one empty column (0) for playability
+
         for (int row = startRow; row < height; row++) {
             boolean hasEmpty = false;
-            // Check if row already has an empty cell
             for (int col = 0; col < width; col++) {
                 if (currentGameMatrix[row][col] == 0) {
                     hasEmpty = true;
                     break;
                 }
             }
-            
-            // If no empty cell, replace a random dirt/gold cell with empty
+
             if (!hasEmpty) {
                 int col = ThreadLocalRandom.current().nextInt(width);
-                // Prefer replacing dirt over gold if possible
                 if (currentGameMatrix[row][col] == GOLD_COLOR) {
-                    // Try to find a dirt cell instead
                     for (int c = 0; c < width; c++) {
                         if (currentGameMatrix[row][c] == DIRT_COLOR) {
                             col = c;
@@ -240,13 +253,7 @@ public class SimpleBoard implements Board {
             }
         }
     }
-    
-    /**
-     * Checks if there are any remaining Gold blocks in the board.
-     * Used in Treasure Hunt mode to determine victory condition.
-     * 
-     * @return true if any Gold blocks (value 9) remain, false otherwise
-     */
+
     public boolean hasRemainingTreasure() {
         for (int row = 0; row < height; row++) {
             for (int col = 0; col < width; col++) {
@@ -257,116 +264,83 @@ public class SimpleBoard implements Board {
         }
         return false;
     }
-    
-    /**
-     * Returns the level property for binding to UI.
-     * Level starts at 1 and increments every 10 cleared lines.
-     * 
-     * @return the IntegerProperty representing the current level
-     */
+
     public IntegerProperty levelProperty() {
         return level;
     }
-    
+
     @Override
     public List<Brick> getNextBricks(int count) {
         return brickGenerator.getNextBricks(count);
     }
-    
+
     @Override
     public int getGhostPieceY() {
         if (currentOffset == null) {
             return BRICK_SPAWN_Y;
         }
-        
-        // Save the current position values (not the reference, since GamePoint is immutable)
+
         int savedX = currentOffset.getX();
         int savedY = currentOffset.getY();
-        
-        // Simulate dropping the brick by repeatedly calling moveBrickDown() until it returns false
-        // This is the EXACT same logic that determines where the brick will land
-        // Keep moving down until we can't move anymore
+
         while (moveBrickDown()) {
-            // Keep moving down - ghostY will be updated to currentOffset.getY() after each successful move
+            // Loop until collision
         }
-        
-        // After the loop, currentOffset.getY() is the landing position (where brick can't move down)
+
         int ghostY = currentOffset.getY();
-        
-        // Restore the original position (we don't want to actually move the brick)
         currentOffset = new GamePoint(savedX, savedY);
-        
         return ghostY;
     }
-    
+
     @Override
     public int hardDrop() {
         if (currentOffset == null) {
             return 0;
         }
-        
-        // Save the starting Y position to calculate how many rows we dropped
+
         int startY = currentOffset.getY();
-        
-        // Drop the brick down until it can't move anymore
-        // This is the same logic as getGhostPieceY(), but we actually move the brick
         while (moveBrickDown()) {
-            // Keep moving down until we can't move anymore
+            // Loop until collision
         }
-        
-        // Calculate how many rows the brick was dropped
-        int rowsDropped = currentOffset.getY() - startY;
-        
-        return rowsDropped;
+        return currentOffset.getY() - startY;
     }
-    
+
     @Override
     public void setGameMode(GameMode mode) {
         this.gameMode = mode;
     }
-    
+
     @Override
     public GameMode getGameMode() {
         return gameMode;
     }
-    
-    /**
-     * Vine color index for overgrowth mode
-     */
-    private static final int VINE_COLOR = 8;
-    
+
     @Override
     public boolean addVineLine() {
-        // Check if top row (row 0) has any non-zero blocks - if yes, game over
         for (int col = 0; col < width; col++) {
             if (currentGameMatrix[0][col] != 0) {
-                return false; // Game over - top row has blocks
+                return false;
             }
         }
-        
-        // Shift all rows up by 1 (row 1 becomes row 0, row 2 becomes row 1, etc.)
+
         for (int row = 0; row < height - 1; row++) {
             for (int col = 0; col < width; col++) {
                 currentGameMatrix[row][col] = currentGameMatrix[row + 1][col];
             }
         }
-        
-        // Create new bottom row filled with vine color (8)
+
         int[] newBottomRow = new int[width];
         for (int col = 0; col < width; col++) {
             newBottomRow[col] = VINE_COLOR;
         }
-        
-        // Create one random hole (set one random column to 0)
+
         int randomHole = ThreadLocalRandom.current().nextInt(width);
         newBottomRow[randomHole] = 0;
-        
-        // Set the new bottom row
+
         for (int col = 0; col < width; col++) {
             currentGameMatrix[height - 1][col] = newBottomRow[col];
         }
-        
-        return true; // Operation successful
+
+        return true;
     }
 }
-

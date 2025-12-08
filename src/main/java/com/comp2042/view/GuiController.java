@@ -178,63 +178,74 @@ public class GuiController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        loadCustomFonts();
+        setupGamePanel();
+        setupGameOverPanel();
+        initializeHighScoreSystem();
+        setupVisualEffects();
+        setupLayoutAndPositioning();
+        initializePausePanel();
+    }
+
+    private void loadCustomFonts() {
         Font.loadFont(getClass().getClassLoader().getResource("digital.ttf").toExternalForm(), DIGITAL_FONT_SIZE);
+    }
+
+    private void setupGamePanel() {
         gamePanel.setFocusTraversable(true);
         gamePanel.requestFocus();
         initializeInputHandlers();
+    }
+
+    private void setupGameOverPanel() {
         gameOverPanel.setVisible(false);
-        
-        // Set up game over panel button actions
         gameOverPanel.setOnNewGame(() -> newGame(null));
-        gameOverPanel.setOnMainMenu(() -> returnToMainMenu());
-        
-        // Initialize high score manager and load high score
+        gameOverPanel.setOnMainMenu(this::returnToMainMenu);
+    }
+
+    private void initializeHighScoreSystem() {
         highScoreManager = new com.comp2042.util.HighScoreManager();
         updateHighScoreDisplay();
+    }
 
+    private void setupVisualEffects() {
         final Reflection reflection = new Reflection();
         reflection.setFraction(REFLECTION_FRACTION);
         reflection.setTopOpacity(REFLECTION_TOP_OPACITY);
         reflection.setTopOffset(REFLECTION_TOP_OFFSET);
-        
-        // Center the game board horizontally
+    }
+
+    private void setupLayoutAndPositioning() {
         centerGameBoard();
-        
-        // Center the game over panel horizontally
         centerGameOverPanel();
-        
-        // Add listener to recenter when window is resized
         setupResizeListener();
-        
-        // Initialize pause panel
-        initializePausePanel();
         Platform.runLater(() -> {
-            if (gameBoard != null) {
-                double boardWidth = 10 * BRICK_SIZE + 9 * 1 + 12 * 2; // ~233px
-                double spacing = 10.0; // Gap between board and panels
-                
-                if (nextBricksPanel != null) {
-                    nextBricksPanel.layoutXProperty().bind(
-                        gameBoard.layoutXProperty().add(boardWidth).add(spacing)
-                    );
-                }
-                
-                if (scorePanel != null) {
-                    // Calculate: BoardX - PanelWidth - Spacing
-                    // Use smaller spacing (5px) to fit in tight window
-                    scorePanel.layoutXProperty().bind(
-                        gameBoard.layoutXProperty().subtract(scorePanel.widthProperty()).subtract(5.0)
-                    );
-                }
-                
-                if (controlsPanel != null && scorePanel != null) {
-                    controlsPanel.layoutXProperty().bind(scorePanel.layoutXProperty());
-                }
-            }
+            bindPanelPositions();
+            createGridOverlay();
         });
-        
-        // Create grid overlay for game board (after scene is ready)
-        Platform.runLater(() -> createGridOverlay());
+    }
+
+    private void bindPanelPositions() {
+        if (gameBoard != null) {
+            double boardWidth = 10 * BRICK_SIZE + 9 * 1 + 12 * 2; // ~233px
+            double spacing = 10.0; // Gap between board and panels
+
+            if (nextBricksPanel != null) {
+                nextBricksPanel.layoutXProperty().bind(
+                    gameBoard.layoutXProperty().add(boardWidth).add(spacing)
+                );
+            }
+
+            if (scorePanel != null) {
+                scorePanel.layoutXProperty().bind(
+                    gameBoard.layoutXProperty().subtract(scorePanel.widthProperty()).subtract(5.0)
+                );
+            }
+
+            if (controlsPanel != null && scorePanel != null) {
+                controlsPanel.layoutXProperty().bind(scorePanel.layoutXProperty());
+            }
+        }
     }
     
     /**

@@ -54,5 +54,29 @@ class SimpleBoardTest {
         int initialScore = score.scoreProperty().getValue();
         assertEquals(0, initialScore, "Score should start at 0");
     }
+
+    @Test
+    void testGameModeSelection() {
+        board.setGameMode(GameMode.TREASURE_HUNT);
+        board.newGame();
+
+        assertEquals(GameMode.TREASURE_HUNT, board.getGameMode(), "Board should report TREASURE_HUNT mode");
+
+        int[][] matrix = board.getBoardMatrix();
+        boolean bottomHasBlocks = false;
+        // Check bottom 8 rows for any non-zero cell (dirt/gold prefill)
+        for (int row = Math.max(0, BOARD_HEIGHT - 8); row < BOARD_HEIGHT; row++) {
+            for (int col = 0; col < BOARD_WIDTH; col++) {
+                if (matrix[row][col] != 0) {
+                    bottomHasBlocks = true;
+                    break;
+                }
+            }
+            if (bottomHasBlocks) {
+                break;
+            }
+        }
+        assertTrue(bottomHasBlocks, "Treasure Hunt should prefill bottom rows with dirt/gold");
+    }
 }
 
