@@ -9,6 +9,7 @@ import com.comp2042.logic.bricks.Brick;
 import com.comp2042.manager.SoundManager;
 import com.comp2042.model.Board;
 import com.comp2042.model.DownData;
+import com.comp2042.model.GameMode;
 import com.comp2042.model.ViewData;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -78,7 +79,7 @@ public class GuiController implements Initializable {
     private static final double REFLECTION_TOP_OFFSET = -12.0;
     
     // Color mapping for brick types
-    /** Array mapping color index to Paint color. Index 0 is TRANSPARENT, indices 1-7 are brick colors. */
+    /** Array mapping color index to Paint color. Index 0 is TRANSPARENT, indices 1-7 are brick colors, index 8 is vine color. */
     private static final Paint[] COLOR_MAP = {
             Color.TRANSPARENT,  // 0
             Color.AQUA,          // 1
@@ -87,7 +88,8 @@ public class GuiController implements Initializable {
             Color.YELLOW,        // 4
             Color.RED,           // 5
             Color.BEIGE,         // 6
-            Color.BURLYWOOD      // 7
+            Color.BURLYWOOD,     // 7
+            Color.web("#228B22") // 8 - Forest Green for vines
     };
     
     /** Default color used when color index is out of bounds */
@@ -148,6 +150,8 @@ public class GuiController implements Initializable {
     private InputEventListener eventListener;
     
     private com.comp2042.util.HighScoreManager highScoreManager;
+    
+    private com.comp2042.controller.GameController gameController; // Reference to GameController for overgrowth timer
 
     private Rectangle[][] rectangles;
     
@@ -851,8 +855,9 @@ public class GuiController implements Initializable {
      * The game speed increases (drop interval decreases) as the level increases.
      * 
      * @param levelProperty the IntegerProperty representing the current level
+     * @param gameMode the current game mode (CLASSIC or OVERGROWTH)
      */
-    public void bindLevel(IntegerProperty levelProperty) {
+    public void bindLevel(IntegerProperty levelProperty, GameMode gameMode) {
         if (levelLabel != null && levelProperty != null) {
             // Bind the level text to the property
             levelLabel.textProperty().bind(levelProperty.asString());
@@ -961,13 +966,30 @@ public class GuiController implements Initializable {
                 if (timeLine != null) {
                     timeLine.pause();
                 }
+                // Pause overgrowth timer if it exists
+                if (gameController != null) {
+                    gameController.pauseOvergrowthTimer(true);
+                }
             } else {
                 if (timeLine != null) {
                     timeLine.play();
                 }
+                // Resume overgrowth timer if it exists
+                if (gameController != null) {
+                    gameController.pauseOvergrowthTimer(false);
+                }
                 gamePanel.requestFocus();
             }
         }
+    }
+    
+    /**
+     * Sets the GameController reference for pause/resume functionality.
+     * 
+     * @param controller the GameController instance
+     */
+    public void setGameController(com.comp2042.controller.GameController controller) {
+        this.gameController = controller;
     }
     
     /**

@@ -65,6 +65,14 @@
         <!-- Settings panel will be added programmatically -->
     </StackPane>
     
+    <!-- Mode Selection Panel - Initially hidden -->
+    <StackPane fx:id="modeSelectionPanelContainer" 
+               visible="false" 
+               managed="false"
+               alignment="CENTER">
+        <!-- Mode selection panel will be added programmatically -->
+    </StackPane>
+    
     <stylesheets>
         <URL value="@window_style.css"/>
     </stylesheets>

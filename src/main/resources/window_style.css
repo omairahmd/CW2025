@@ -316,3 +316,36 @@
     -fx-font-family: "Let's go Digital";
     -fx-font-size: 12px;
 }
+
+/* Mode Selection Panel Styles */
+.mode-selection-panel-content {
+    -fx-alignment: CENTER;
+    -fx-spacing: 30;
+    -fx-background-color: rgba(26, 42, 46, 0.95); /* Dark jungle green with high opacity */
+    -fx-background-radius: 15px;
+    -fx-border-color: linear-gradient(#2d5a3d, #4a7c59); /* Jungle green border */
+    -fx-border-width: 3px;
+    -fx-border-radius: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
+    -fx-min-width: 400px;
+    -fx-pref-width: 400px;
+    -fx-max-width: 400px;
+    -fx-min-height: 400px;
+    -fx-pref-height: 400px;
+    -fx-max-height: 400px;
+}
+
+.mode-selection-title {
+    -fx-font-family: "Modern Tetris";
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e2ba45; /* Golden yellow */
+    -fx-alignment: CENTER;
+}
+
+/* Overgrowth button - smaller font to fit longer text */
+.overgrowth-button {
+    -fx-font-size: 14px; /* Smaller font for "jungle\nOvergrowth" text */
+    -fx-wrap-text: true; /* Allow text to wrap to multiple lines */
+    -fx-text-alignment: center; /* Center the text */
+}

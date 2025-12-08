@@ -1,5 +1,6 @@
 package com.comp2042.view;
 
+import com.comp2042.model.GameMode;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -36,10 +37,14 @@ public class MainMenuController implements Initializable {
     
     @FXML
     private javafx.scene.layout.StackPane settingsPanelContainer;
+    
+    @FXML
+    private javafx.scene.layout.StackPane modeSelectionPanelContainer;
 
     private MediaPlayer mediaPlayer;
     private Stage primaryStage;
     private SettingsPanel settingsPanel;
+    private ModeSelectionPanel modeSelectionPanel;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -251,6 +256,9 @@ public class MainMenuController implements Initializable {
         
         // Initialize settings panel
         initializeSettingsPanel();
+        
+        // Initialize mode selection panel
+        initializeModeSelectionPanel();
     }
     
     /**
@@ -305,11 +313,23 @@ public class MainMenuController implements Initializable {
 
     /**
      * Handles the Start button action.
-     * Loads and displays the game screen.
+     * Shows the mode selection panel.
      */
     @FXML
     private void handleStart() {
+        showModeSelection();
+    }
+    
+    /**
+     * Starts the game in the specified mode.
+     * 
+     * @param mode the game mode to start (CLASSIC or ZEN)
+     */
+    private void startGame(GameMode mode) {
         try {
+            // Hide mode selection panel
+            hideModeSelection();
+            
             // Stop the video
             if (mediaPlayer != null) {
                 mediaPlayer.stop();
@@ -330,8 +350,8 @@ public class MainMenuController implements Initializable {
                 // Set primary stage reference in GuiController for navigation
                 guiController.setPrimaryStage(primaryStage);
                 
-                // Initialize the game
-                new com.comp2042.controller.GameController(guiController);
+                // Initialize the game with selected mode
+                new com.comp2042.controller.GameController(guiController, mode);
             }
         } catch (Exception e) {
             System.err.println("Error loading game: " + e.getMessage());
@@ -346,6 +366,46 @@ public class MainMenuController implements Initializable {
     @FXML
     private void handleSettings() {
         showSettings();
+    }
+    
+    /**
+     * Initializes the mode selection panel.
+     */
+    private void initializeModeSelectionPanel() {
+        modeSelectionPanel = new ModeSelectionPanel();
+        modeSelectionPanel.setOnClassic(() -> startGame(GameMode.CLASSIC));
+        modeSelectionPanel.setOnOvergrowth(() -> startGame(GameMode.OVERGROWTH));
+        if (modeSelectionPanelContainer != null) {
+            modeSelectionPanelContainer.getChildren().add(modeSelectionPanel);
+            modeSelectionPanelContainer.setVisible(false);
+            modeSelectionPanelContainer.setManaged(false);
+        }
+    }
+    
+    /**
+     * Shows the mode selection panel and hides main menu buttons.
+     */
+    private void showModeSelection() {
+        buttonsOverlay.setVisible(false);
+        buttonsOverlay.setManaged(false);
+        if (modeSelectionPanelContainer != null) {
+            modeSelectionPanelContainer.setVisible(true);
+            modeSelectionPanelContainer.setManaged(true);
+            modeSelectionPanelContainer.toFront();
+        }
+    }
+    
+    /**
+     * Hides the mode selection panel and shows main menu buttons.
+     */
+    private void hideModeSelection() {
+        if (modeSelectionPanelContainer != null) {
+            modeSelectionPanelContainer.setVisible(false);
+            modeSelectionPanelContainer.setManaged(false);
+        }
+        buttonsOverlay.setVisible(true);
+        buttonsOverlay.setManaged(true);
+        buttonsOverlay.toFront();
     }
 
     /**

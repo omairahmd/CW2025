@@ -65,5 +65,27 @@ public interface Board {
      * @return the IntegerProperty representing the current level
      */
     IntegerProperty levelProperty();
+    
+    /**
+     * Sets the game mode (CLASSIC or ZEN).
+     * 
+     * @param mode the game mode to set
+     */
+    void setGameMode(GameMode mode);
+    
+    /**
+     * Gets the current game mode.
+     * 
+     * @return the current game mode
+     */
+    GameMode getGameMode();
+    
+    /**
+     * Adds a vine line at the bottom and shifts the board up.
+     * Used in OVERGROWTH mode. Returns false if game over (top row has blocks).
+     * 
+     * @return true if operation successful, false if game over
+     */
+    boolean addVineLine();
 }
 

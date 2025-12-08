@@ -7,9 +7,13 @@ import com.comp2042.manager.SoundManager;
 import com.comp2042.model.Board;
 import com.comp2042.model.ClearRow;
 import com.comp2042.model.DownData;
+import com.comp2042.model.GameMode;
 import com.comp2042.model.SimpleBoard;
 import com.comp2042.model.ViewData;
 import com.comp2042.view.GuiController;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
 public class GameController implements InputEventListener {
 
@@ -30,15 +34,68 @@ public class GameController implements InputEventListener {
     private Board board = new SimpleBoard(BOARD_WIDTH, BOARD_HEIGHT);
 
     private final GuiController viewGuiController;
+    
+    private Timeline overgrowthTimer;
 
     public GameController(GuiController c) {
+        this(c, GameMode.CLASSIC);
+    }
+    
+    public GameController(GuiController c, GameMode mode) {
         viewGuiController = c;
+        board.setGameMode(mode);
         board.createNewBrick();
         viewGuiController.setEventListener(this);
         viewGuiController.setBoard(board); // Set board reference for next bricks display
         viewGuiController.initGameView(board.getBoardMatrix(), board.getViewData());
         viewGuiController.bindScore(board.getScore().scoreProperty()); // Binds score
-        viewGuiController.bindLevel(board.levelProperty()); // Binds level and sets up speed adjustment
+        viewGuiController.bindLevel(board.levelProperty(), board.getGameMode()); // Binds level and sets up speed adjustment
+        viewGuiController.setGameController(this); // Set GameController reference for pause/resume
+        
+        // Initialize overgrowth timer if in OVERGROWTH mode
+        if (board.getGameMode() == GameMode.OVERGROWTH) {
+            initializeOvergrowthTimer();
+        }
+    }
+    
+    /**
+     * Initializes the overgrowth timer that adds vine lines every 10 seconds.
+     */
+    private void initializeOvergrowthTimer() {
+        overgrowthTimer = new Timeline(new KeyFrame(
+            Duration.seconds(10),
+            ae -> {
+                if (board.addVineLine()) {
+                    // Operation successful - refresh the view
+                    refreshGameView();
+                } else {
+                    // Game over - top row has blocks
+                    viewGuiController.updateHighScore(board.getScore().scoreProperty().get());
+                    viewGuiController.gameOver();
+                    if (overgrowthTimer != null) {
+                        overgrowthTimer.stop();
+                    }
+                }
+            }
+        ));
+        overgrowthTimer.setCycleCount(Timeline.INDEFINITE);
+        overgrowthTimer.play();
+    }
+    
+    /**
+     * Pauses or resumes the overgrowth timer.
+     * Used when the game is paused/unpaused.
+     * 
+     * @param pause true to pause, false to resume
+     */
+    public void pauseOvergrowthTimer(boolean pause) {
+        if (overgrowthTimer != null) {
+            if (pause) {
+                overgrowthTimer.pause();
+            } else {
+                overgrowthTimer.play();
+            }
+        }
     }
 
     @Override
@@ -90,6 +147,10 @@ public class GameController implements InputEventListener {
             int currentScore = board.getScore().scoreProperty().getValue();
             viewGuiController.updateHighScore(currentScore);
             viewGuiController.gameOver();
+            // Stop overgrowth timer if it's running
+            if (overgrowthTimer != null) {
+                overgrowthTimer.stop();
+            }
         }
     }
 

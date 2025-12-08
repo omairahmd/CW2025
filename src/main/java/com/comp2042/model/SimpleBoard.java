@@ -11,6 +11,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class SimpleBoard implements Board {
 
@@ -43,6 +44,7 @@ public class SimpleBoard implements Board {
     private final Score score;
     private final IntegerProperty level = new SimpleIntegerProperty(1);
     private int linesClearedTotal = 0;
+    private GameMode gameMode = GameMode.CLASSIC;
 
     public SimpleBoard(int width, int height) {
         this.width = width;
@@ -225,6 +227,55 @@ public class SimpleBoard implements Board {
         int rowsDropped = currentOffset.getY() - startY;
         
         return rowsDropped;
+    }
+    
+    @Override
+    public void setGameMode(GameMode mode) {
+        this.gameMode = mode;
+    }
+    
+    @Override
+    public GameMode getGameMode() {
+        return gameMode;
+    }
+    
+    /**
+     * Vine color index for overgrowth mode
+     */
+    private static final int VINE_COLOR = 8;
+    
+    @Override
+    public boolean addVineLine() {
+        // Check if top row (row 0) has any non-zero blocks - if yes, game over
+        for (int col = 0; col < width; col++) {
+            if (currentGameMatrix[0][col] != 0) {
+                return false; // Game over - top row has blocks
+            }
+        }
+        
+        // Shift all rows up by 1 (row 1 becomes row 0, row 2 becomes row 1, etc.)
+        for (int row = 0; row < height - 1; row++) {
+            for (int col = 0; col < width; col++) {
+                currentGameMatrix[row][col] = currentGameMatrix[row + 1][col];
+            }
+        }
+        
+        // Create new bottom row filled with vine color (8)
+        int[] newBottomRow = new int[width];
+        for (int col = 0; col < width; col++) {
+            newBottomRow[col] = VINE_COLOR;
+        }
+        
+        // Create one random hole (set one random column to 0)
+        int randomHole = ThreadLocalRandom.current().nextInt(width);
+        newBottomRow[randomHole] = 0;
+        
+        // Set the new bottom row
+        for (int col = 0; col < width; col++) {
+            currentGameMatrix[height - 1][col] = newBottomRow[col];
+        }
+        
+        return true; // Operation successful
     }
 }
 
