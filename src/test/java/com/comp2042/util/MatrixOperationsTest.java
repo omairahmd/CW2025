@@ -315,10 +315,10 @@ class MatrixOperationsTest {
     @Test
     void testMerge_IndexingFix_WideBrick() {
         // Arrange: Wide brick (1 row, 2 columns) - tests indexing fix
-        // Note: merge uses targetX = x + i, targetY = y + j
+        // Note: merge uses targetX = x + j, targetY = y + i (corrected indexing)
         // So for brick {{1, 2}} at (x=4, y=5):
-        // - i=0, j=0: result[5][4] = 1
-        // - i=0, j=1: result[6][4] = 2
+        // - i=0, j=0: result[5][4] = 1 (targetX = 4+0=4, targetY = 5+0=5)
+        // - i=0, j=1: result[5][5] = 2 (targetX = 4+1=5, targetY = 5+0=5)
         int[][] board = new int[BOARD_HEIGHT][BOARD_WIDTH];
         int[][] brick = new int[][]{
                 {1, 2} // 1 row, 2 columns
@@ -331,7 +331,7 @@ class MatrixOperationsTest {
         
         // Assert: Should merge correctly with fixed indexing (no crash)
         assertEquals(1, result[y][x], "First brick cell should be merged correctly at (x, y)");
-        assertEquals(2, result[y + 1][x], "Second brick cell should be merged correctly at (x, y+1) - indexing fix verified");
+        assertEquals(2, result[y][x + 1], "Second brick cell should be merged correctly at (x+1, y) - indexing fix verified");
     }
 
     @Test

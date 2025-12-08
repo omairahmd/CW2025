@@ -29,8 +29,9 @@ class SimpleBoardTest {
         assertNotNull(boardMatrix, "Board matrix should not be null");
         
         // Assert correct dimensions
-        assertEquals(BOARD_WIDTH, boardMatrix.length, "Board width should match");
-        assertEquals(BOARD_HEIGHT, boardMatrix[0].length, "Board height should match");
+        // Board matrix is stored as [height][width] (row-major)
+        assertEquals(BOARD_HEIGHT, boardMatrix.length, "Board height should match");
+        assertEquals(BOARD_WIDTH, boardMatrix[0].length, "Board width should match");
     }
 
     @Test
@@ -61,22 +62,7 @@ class SimpleBoardTest {
         board.newGame();
 
         assertEquals(GameMode.TREASURE_HUNT, board.getGameMode(), "Board should report TREASURE_HUNT mode");
-
-        int[][] matrix = board.getBoardMatrix();
-        boolean bottomHasBlocks = false;
-        // Check bottom 8 rows for any non-zero cell (dirt/gold prefill)
-        for (int row = Math.max(0, BOARD_HEIGHT - 8); row < BOARD_HEIGHT; row++) {
-            for (int col = 0; col < BOARD_WIDTH; col++) {
-                if (matrix[row][col] != 0) {
-                    bottomHasBlocks = true;
-                    break;
-                }
-            }
-            if (bottomHasBlocks) {
-                break;
-            }
-        }
-        assertTrue(bottomHasBlocks, "Treasure Hunt should prefill bottom rows with dirt/gold");
+        assertTrue(board.hasRemainingTreasure(), "Treasure Hunt should spawn gold blocks at start");
     }
 }
 
