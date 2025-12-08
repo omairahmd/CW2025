@@ -164,7 +164,98 @@ public class SimpleBoard implements Board {
         score.reset();
         level.set(1);
         linesClearedTotal = 0;
+        
+        // Initialize treasure field if in TREASURE_HUNT mode
+        if (gameMode == GameMode.TREASURE_HUNT) {
+            initTreasureField();
+        }
+        
         createNewBrick();
+    }
+    
+    /**
+     * Dirt color index for treasure hunt mode
+     */
+    private static final int DIRT_COLOR = 8;
+    
+    /**
+     * Gold color index for treasure hunt mode
+     */
+    private static final int GOLD_COLOR = 9;
+    
+    /**
+     * Initializes the treasure field for Treasure Hunt mode.
+     * Fills the bottom 8 rows with Dirt blocks and randomly places Gold blocks.
+     * Ensures every row has at least one empty column for playability.
+     */
+    private void initTreasureField() {
+        // Fill bottom 8 rows with Dirt
+        int startRow = height - 8; // Start from row height-8 (bottom 8 rows)
+        for (int row = startRow; row < height; row++) {
+            for (int col = 0; col < width; col++) {
+                currentGameMatrix[row][col] = DIRT_COLOR;
+            }
+        }
+        
+        // Randomly place 5-8 Gold blocks in the bottom 8 rows
+        int goldCount = ThreadLocalRandom.current().nextInt(5, 9); // 5 to 8 gold blocks
+        int placedGold = 0;
+        
+        while (placedGold < goldCount) {
+            int row = ThreadLocalRandom.current().nextInt(startRow, height);
+            int col = ThreadLocalRandom.current().nextInt(width);
+            
+            // Only place gold if the cell is currently dirt (not already gold)
+            if (currentGameMatrix[row][col] == DIRT_COLOR) {
+                currentGameMatrix[row][col] = GOLD_COLOR;
+                placedGold++;
+            }
+        }
+        
+        // Ensure every row has at least one empty column (0) for playability
+        for (int row = startRow; row < height; row++) {
+            boolean hasEmpty = false;
+            // Check if row already has an empty cell
+            for (int col = 0; col < width; col++) {
+                if (currentGameMatrix[row][col] == 0) {
+                    hasEmpty = true;
+                    break;
+                }
+            }
+            
+            // If no empty cell, replace a random dirt/gold cell with empty
+            if (!hasEmpty) {
+                int col = ThreadLocalRandom.current().nextInt(width);
+                // Prefer replacing dirt over gold if possible
+                if (currentGameMatrix[row][col] == GOLD_COLOR) {
+                    // Try to find a dirt cell instead
+                    for (int c = 0; c < width; c++) {
+                        if (currentGameMatrix[row][c] == DIRT_COLOR) {
+                            col = c;
+                            break;
+                        }
+                    }
+                }
+                currentGameMatrix[row][col] = 0;
+            }
+        }
+    }
+    
+    /**
+     * Checks if there are any remaining Gold blocks in the board.
+     * Used in Treasure Hunt mode to determine victory condition.
+     * 
+     * @return true if any Gold blocks (value 9) remain, false otherwise
+     */
+    public boolean hasRemainingTreasure() {
+        for (int row = 0; row < height; row++) {
+            for (int col = 0; col < width; col++) {
+                if (currentGameMatrix[row][col] == GOLD_COLOR) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     
     /**

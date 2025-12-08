@@ -79,7 +79,7 @@ public class GuiController implements Initializable {
     private static final double REFLECTION_TOP_OFFSET = -12.0;
     
     // Color mapping for brick types
-    /** Array mapping color index to Paint color. Index 0 is TRANSPARENT, indices 1-7 are brick colors, index 8 is vine color. */
+    /** Array mapping color index to Paint color. Index 0 is TRANSPARENT, indices 1-7 are brick colors, index 8 is vine/dirt color, index 9 is gold color. */
     private static final Paint[] COLOR_MAP = {
             Color.TRANSPARENT,  // 0
             Color.AQUA,          // 1
@@ -89,7 +89,8 @@ public class GuiController implements Initializable {
             Color.RED,           // 5
             Color.BEIGE,         // 6
             Color.BURLYWOOD,     // 7
-            Color.web("#228B22") // 8 - Forest Green for vines
+            Color.rgb(101, 67, 33), // 8 - Dark Brown for Dirt (also used for vines in OVERGROWTH)
+            Color.GOLD           // 9 - Gold for Treasure Hunt
     };
     
     /** Default color used when color index is out of bounds */
@@ -580,7 +581,7 @@ public class GuiController implements Initializable {
 
     /**
      * Initializes the background grid (displayMatrix) that represents the game board.
-     * Creates transparent rectangles for each cell in the visible portion of the board.
+     * Creates rectangles for each cell in the visible portion of the board and sets their initial colors.
      *
      * @param boardMatrix the game board matrix
      */
@@ -589,7 +590,8 @@ public class GuiController implements Initializable {
         for (int i = BOARD_VISIBLE_START_ROW; i < boardMatrix.length; i++) {
             for (int j = 0; j < boardMatrix[i].length; j++) {
                 Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
-                rectangle.setFill(Color.TRANSPARENT);
+                // Set initial color based on board matrix (important for pre-filled modes like TREASURE_HUNT)
+                rectangle.setFill(getFillColor(boardMatrix[i][j]));
                 displayMatrix[i][j] = rectangle;
                 gamePanel.add(rectangle, j, i - BOARD_VISIBLE_START_ROW);
             }
@@ -886,6 +888,10 @@ public class GuiController implements Initializable {
 
     public void gameOver() {
         timeLine.stop();
+        // Reset title in case it was changed for victory
+        if (gameOverPanel != null) {
+            gameOverPanel.resetTitle();
+        }
         gameOverPanel.setVisible(true);
         isGameOver.setValue(Boolean.TRUE);
         // Re-center the panel when it becomes visible to ensure accurate positioning
@@ -901,6 +907,25 @@ public class GuiController implements Initializable {
         });
         // Play game over sound and stop background music
         SoundManager.getInstance().playSound("gameover");
+        SoundManager.getInstance().stopMusic();
+    }
+    
+    /**
+     * Shows the victory screen when the player wins (e.g., clears all gold in Treasure Hunt mode).
+     * Reuses the gameOverPanel but changes the title to "YOU WIN!" in gold color.
+     */
+    public void showVictory() {
+        timeLine.stop();
+        // Update game over panel title to victory message
+        if (gameOverPanel != null) {
+            gameOverPanel.setVictoryTitle();
+        }
+        
+        gameOverPanel.setVisible(true);
+        isGameOver.setValue(Boolean.TRUE);
+        centerGameOverPanel(); // Recenter when shown
+        groupNotification.toFront(); // Ensure it's on top
+        SoundManager.getInstance().playSound("clear"); // Play clear sound for victory
         SoundManager.getInstance().stopMusic();
     }
 

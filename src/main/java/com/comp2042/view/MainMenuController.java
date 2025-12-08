@@ -375,6 +375,7 @@ public class MainMenuController implements Initializable {
         modeSelectionPanel = new ModeSelectionPanel();
         modeSelectionPanel.setOnClassic(() -> startGame(GameMode.CLASSIC));
         modeSelectionPanel.setOnOvergrowth(() -> startGame(GameMode.OVERGROWTH));
+        modeSelectionPanel.setOnTreasureHunt(() -> startGame(GameMode.TREASURE_HUNT));
         if (modeSelectionPanelContainer != null) {
             modeSelectionPanelContainer.getChildren().add(modeSelectionPanel);
             modeSelectionPanelContainer.setVisible(false);

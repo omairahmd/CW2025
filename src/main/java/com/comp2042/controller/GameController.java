@@ -44,7 +44,7 @@ public class GameController implements InputEventListener {
     public GameController(GuiController c, GameMode mode) {
         viewGuiController = c;
         board.setGameMode(mode);
-        board.createNewBrick();
+        board.newGame(); // Initialize the game (including treasure field for TREASURE_HUNT mode)
         viewGuiController.setEventListener(this);
         viewGuiController.setBoard(board); // Set board reference for next bricks display
         viewGuiController.initGameView(board.getBoardMatrix(), board.getViewData());
@@ -121,7 +121,15 @@ public class GameController implements InputEventListener {
         board.mergeBrickToBackground();
         ClearRow clearRow = board.clearRows();
         updateScoreForClearedRows(clearRow);
-        checkAndHandleGameOver();
+        
+        // Check for victory condition in Treasure Hunt mode
+        if (board.getGameMode() == GameMode.TREASURE_HUNT && !board.hasRemainingTreasure()) {
+            viewGuiController.showVictory();
+            viewGuiController.gameOver(); // Stop the game loop
+        } else {
+            checkAndHandleGameOver();
+        }
+        
         refreshGameView();
         return clearRow;
     }

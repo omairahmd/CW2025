@@ -13,6 +13,7 @@ public class GameOverPanel extends VBox {
     
     private Button newGameButton;
     private Button mainMenuButton;
+    private Label titleLabel;
     
     public GameOverPanel() {
         // Set jungle-themed background
@@ -22,8 +23,8 @@ public class GameOverPanel extends VBox {
         this.setPadding(new javafx.geometry.Insets(40, 30, 40, 30));
         
         // "GAME OVER" title
-        Label gameOverLabel = new Label("GAME OVER");
-        gameOverLabel.getStyleClass().add("game-over-title");
+        titleLabel = new Label("GAME OVER");
+        titleLabel.getStyleClass().add("game-over-title");
         
         // Buttons
         newGameButton = new Button("NEW GAME");
@@ -36,10 +37,31 @@ public class GameOverPanel extends VBox {
         
         // Add all elements to VBox
         this.getChildren().addAll(
-            gameOverLabel,
+            titleLabel,
             newGameButton,
             mainMenuButton
         );
+    }
+    
+    /**
+     * Changes the title to "YOU WIN!" with gold color for victory screen.
+     */
+    public void setVictoryTitle() {
+        if (titleLabel != null) {
+            titleLabel.setText("YOU WIN!");
+            titleLabel.setStyle("-fx-text-fill: #FFD700; -fx-font-size: 32px; -fx-font-family: 'Modern Tetris'; -fx-font-weight: bold;");
+        }
+    }
+    
+    /**
+     * Resets the title back to "GAME OVER" for normal game over screen.
+     */
+    public void resetTitle() {
+        if (titleLabel != null) {
+            titleLabel.setText("GAME OVER");
+            titleLabel.getStyleClass().clear();
+            titleLabel.getStyleClass().add("game-over-title");
+        }
     }
     
     /**

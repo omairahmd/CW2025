@@ -87,5 +87,13 @@ public interface Board {
      * @return true if operation successful, false if game over
      */
     boolean addVineLine();
+    
+    /**
+     * Checks if there are any remaining Gold blocks in the board.
+     * Used in Treasure Hunt mode to determine victory condition.
+     * 
+     * @return true if any Gold blocks remain, false otherwise
+     */
+    boolean hasRemainingTreasure();
 }
 

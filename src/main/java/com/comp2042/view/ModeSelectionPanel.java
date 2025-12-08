@@ -14,6 +14,7 @@ public class ModeSelectionPanel extends StackPane {
 
     private Button classicButton;
     private Button overgrowthButton;
+    private Button treasureHuntButton;
 
     public ModeSelectionPanel() {
         // Semi-transparent black background
@@ -33,15 +34,20 @@ public class ModeSelectionPanel extends StackPane {
         classicButton = new Button("CLASSIC");
         classicButton.getStyleClass().add("jungle-button");
         
-        overgrowthButton = new Button("jungle\nOvergrowth");
+        overgrowthButton = new Button("Jungle\nOvergrowth");
         overgrowthButton.getStyleClass().add("jungle-button");
         overgrowthButton.getStyleClass().add("overgrowth-button"); // Smaller font for longer text
+        
+        treasureHuntButton = new Button("Treasure\nHunt");
+        treasureHuntButton.getStyleClass().add("jungle-button");
+        treasureHuntButton.getStyleClass().add("overgrowth-button"); // Use same style as overgrowth for multi-line
         
         // Add all elements to VBox
         contentBox.getChildren().addAll(
             titleLabel,
             classicButton,
-            overgrowthButton
+            overgrowthButton,
+            treasureHuntButton
         );
         
         // Add VBox to StackPane (centered)
@@ -55,6 +61,10 @@ public class ModeSelectionPanel extends StackPane {
     
     public void setOnOvergrowth(Runnable action) {
         overgrowthButton.setOnAction(e -> action.run());
+    }
+    
+    public void setOnTreasureHunt(Runnable action) {
+        treasureHuntButton.setOnAction(e -> action.run());
     }
 }
 

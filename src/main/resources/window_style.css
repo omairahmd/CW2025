@@ -345,7 +345,7 @@
 
 /* Overgrowth button - smaller font to fit longer text */
 .overgrowth-button {
-    -fx-font-size: 14px; /* Smaller font for "jungle\nOvergrowth" text */
+    -fx-font-size: 10px; /* Smaller font for multi-line text */
     -fx-wrap-text: true; /* Allow text to wrap to multiple lines */
     -fx-text-alignment: center; /* Center the text */
 }
